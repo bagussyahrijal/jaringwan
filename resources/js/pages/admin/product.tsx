@@ -91,12 +91,15 @@ export default function AdminProduct({ products, categories }: Props) {
         e.preventDefault();
 
         if (editingProduct) {
-            put(`/admin/product/${editingProduct.id}`, {
+            setData((prev) => ({ ...prev, _method: 'put' }));
+            post(`/admin/product/${editingProduct.id}`, {
                 onSuccess: () => closeModal(),
+                forceFormData: true,
             });
         } else {
             post('/admin/product', {
                 onSuccess: () => closeModal(),
+                forceFormData: true,
             });
         }
     };

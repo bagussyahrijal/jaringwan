@@ -33,13 +33,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(fu
     //Admin Product Routes
     Route::get('/product', [ProductController::class, 'index'])->name('product.index');
     Route::post('/product', [ProductController::class, 'store'])->name('product.store');
-    Route::put('/product/{id}', [ProductController::class, 'update'])->name('product.update');
+    Route::post('/product/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::delete('/product/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
 
     //Admin Category Routes
     Route::get('/category', [CategoryController::class, 'index'])->name('category.index');
     Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
-    Route::put('/category/{id}', [CategoryController::class, 'update'])->name('category.update');
+    Route::post('/category/{id}', [CategoryController::class, 'update'])->name('category.update');
     Route::delete('/category/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 });
 
