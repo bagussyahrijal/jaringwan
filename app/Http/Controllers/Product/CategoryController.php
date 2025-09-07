@@ -11,7 +11,9 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::latest()->get();
+        $categories = Category::withCount('products')->with(['products' => function($query) {
+            $query->select('id', 'name', 'image', 'price', 'category_id')->latest()->take(3);
+        }])->latest()->get();
 
         return Inertia::render('admin/category', ['categories' => $categories,]);
     }

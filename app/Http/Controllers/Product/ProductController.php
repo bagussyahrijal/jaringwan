@@ -36,7 +36,7 @@ class ProductController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'image' => 'required|image|mimes:jpg,jpeg,png|max:2048',
-            'title' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
@@ -58,7 +58,7 @@ class ProductController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'title' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
@@ -74,7 +74,7 @@ class ProductController extends Controller
             $product->update([
                 'category_id' => $request->input('category_id'),
                 'image' => $imagePath,
-                'title' => $request->input('title'),
+                'name' => $request->input('name'),
                 'description' => $request->input('description'),
                 'price' => $request->input('price'),
                 'stock' => $request->input('stock'),
@@ -82,7 +82,7 @@ class ProductController extends Controller
         } else {
             $product->update([
                 'category_id' => $request->input('category_id'),
-                'title' => $request->input('title'),
+                'name' => $request->input('name'),
                 'description' => $request->input('description'),
                 'price' => $request->input('price'),
                 'stock' => $request->input('stock'),
