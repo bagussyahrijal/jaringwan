@@ -18,8 +18,6 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         Role::create(['name' => 'admin']);
-        Role::create(['name' => 'auditor']);
-        Role::create(['name' => 'teacher']);
 
         User::factory()->create([
             'name' => 'Admin',
@@ -27,19 +25,5 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
             'email_verified_at' => now(),
         ])->assignRole('admin');
-
-        User::factory()->create([
-            'name' => 'Auditor',
-            'email' => 'auditor@gmail.com',
-            'password' => bcrypt('password'),
-            'email_verified_at' => now(),
-        ])->assignRole('auditor');
-
-        User::factory()->create([
-            'name' => 'Teacher',
-            'email' => 'teacher@gmail.com',
-            'password' => bcrypt('password'),
-            'email_verified_at' => now(),
-        ])->assignRole('teacher');
     }
 }

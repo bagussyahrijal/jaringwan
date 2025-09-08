@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\About\InformationController;
+use App\Http\Controllers\About\OnlineShopController;
 use App\Http\Controllers\Gallery\GalleryController;
 use App\Http\Controllers\Product\CategoryController;
 use App\Http\Controllers\Product\ProductController;
@@ -13,11 +15,12 @@ Route::get('/', function () {
 Route::get('dashboard', function () {
     return Inertia::render('dashboard');
 })->name('dashboard');
-Route::get('about', function () {
-    return Inertia::render('about');
-})->name('about');
+Route::get('about', [OnlineShopController::class, 'publicIndex'])->name('about');
+
 Route::get('product', [ProductController::class, 'publicIndex'])->name('product');
+
 Route::get('gallery', [GalleryController::class, 'publicIndex'])->name('gallery');
+
 Route::get('contact', function () {
     return Inertia::render('contact');
 })->name('contact');
@@ -44,6 +47,18 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(fu
     Route::post('/gallery', [GalleryController::class, 'store'])->name('admin.gallery.store');
     Route::post('/gallery/{gallery}', [GalleryController::class, 'update'])->name('admin.gallery.update');
     Route::delete('/gallery/{gallery}', [GalleryController::class, 'destroy'])->name('admin.gallery.destroy');
+
+    //Admin Online Shop Routes
+    Route::get('/online-shop', [OnlineShopController::class, 'index'])->name('admin.online-shop.index');
+    Route::post('/online-shop', [OnlineShopController::class, 'store'])->name('admin.online-shop.store');
+    Route::post('/online-shop/{id}', [OnlineShopController::class, 'update'])->name('admin.online-shop.update');
+    Route::delete('/online-shop/{id}', [OnlineShopController::class, 'destroy'])->name('admin.online-shop.destroy');
+
+    //Admin Information Routes
+    Route::get('/information', [InformationController::class, 'index'])->name('admin.information.index');
+    Route::post('/information', [InformationController::class, 'store'])->name('admin.information.store');
+    Route::post('/information/{id}', [InformationController::class, 'update'])->name('admin.information.update');
+    Route::delete('/information/{id}', [InformationController::class, 'destroy'])->name('admin.information.destroy');
 });
 
 
