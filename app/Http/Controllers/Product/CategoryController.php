@@ -28,7 +28,7 @@ class CategoryController extends Controller
 
         Category::create($data);
 
-        return redirect()->route('category.index')->with('success', 'Kategori berhasil ditambahkan.');
+        return redirect()->route('admin.category.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
 
     public function update(Request $request, string $id)
@@ -40,13 +40,13 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         $category->update($request->all());
 
-        return redirect()->route('category.index')->with('success', 'Kategori berhasil diperbarui.');
+        return redirect()->route('admin.category.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
     public function destroy(string $id)
     {
         $category = Category::findOrFail($id);
         $category->delete();
-        return redirect()->route('category.index')->with('success', 'Kategori berhasil dihapus.');
+        return redirect()->route('admin.category.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }

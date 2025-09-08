@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, useForm } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import { motion } from 'framer-motion';
 import { Edit, Plus, Trash2, Upload, X } from 'lucide-react';
 import React, { useState } from 'react';
@@ -90,16 +91,20 @@ export default function AdminProduct({ products, categories }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        // ensure method spoofing for update
         if (editingProduct) {
             setData((prev) => ({ ...prev, _method: 'put' }));
-            post(`/admin/product/${editingProduct.id}`, {
-                onSuccess: () => closeModal(),
+
+            // use Ziggy route helper and Inertia router.post
+            router.post(route('admin.product.update', editingProduct.id), data, {
                 forceFormData: true,
+                onSuccess: () => closeModal(),
             });
         } else {
-            post('/admin/product', {
-                onSuccess: () => closeModal(),
+            // create new product
+            router.post(route('admin.product.store'), data, {
                 forceFormData: true,
+                onSuccess: () => closeModal(),
             });
         }
     };
@@ -162,13 +167,13 @@ export default function AdminProduct({ products, categories }: Props) {
                                                 onClick={() => openEditModal(product)}
                                                 className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
                                             >
-                                                <Edit className="h-4 w-4" />
+                                                <Edit className="h-4 w-4 text-[#0123AA]" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(product.id)}
                                                 className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-4 w-4 text-[#0123AA]" />
                                             </button>
                                         </div>
                                     </div>

@@ -11,6 +11,17 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
+    public function publicIndex()
+    {
+        $products = Product::with('category')->latest()->get();
+        $categories = Category::all();
+
+        return Inertia::render('product', [
+            'products' => $products,
+            'categories' => $categories
+        ]);
+    }
+
     public function index() 
     {
         $products = Product::with('category')->latest()->get();
@@ -50,7 +61,7 @@ class ProductController extends Controller
         
         Product::create($data);
 
-        return redirect()->route('product.index')->with('success', 'Product created successfully.');
+        return redirect()->route('admin.product.index')->with('success', 'Product created successfully.');
     }
 
     public function update(Request $request, string $id) 
@@ -89,7 +100,7 @@ class ProductController extends Controller
             ]);
         }
 
-        return redirect()->route('product.index')->with('success', 'Product updated successfully.');
+        return redirect()->route('admin.product.index')->with('success', 'Product updated successfully.');
     }
 
     public function destroy(string $id)
@@ -98,7 +109,7 @@ class ProductController extends Controller
         Storage::disk('public')->delete($product->image);
         $product->delete();
 
-        return redirect()->route('product.index')->with('success', 'Product deleted successfully.');
+        return redirect()->route('admin.product.index')->with('success', 'Product deleted successfully.');
     }
 
     public function adminDashboard()

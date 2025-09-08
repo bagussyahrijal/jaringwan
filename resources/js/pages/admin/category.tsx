@@ -26,11 +26,13 @@ interface Props {
     categories: Category[];
 }
 
+declare const route: any;
+
 export default function AdminCategory({ categories }: Props) {
     const [showModal, setShowModal] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm<{ name: string; _method?: string }>({
         name: '',
     });
 
@@ -58,11 +60,14 @@ export default function AdminCategory({ categories }: Props) {
         e.preventDefault();
 
         if (editingCategory) {
-            put(`/admin/category/${editingCategory.id}`, {
+            // method spoofing for Laravel
+            setData((prev) => ({ ...prev, _method: 'put' }));
+
+            router.post(route('admin.category.update', editingCategory.id), data, {
                 onSuccess: () => closeModal(),
             });
         } else {
-            post('/admin/category', {
+            router.post(route('admin.category.store'), data, {
                 onSuccess: () => closeModal(),
             });
         }
@@ -70,7 +75,7 @@ export default function AdminCategory({ categories }: Props) {
 
     const handleDelete = (id: number) => {
         if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-            router.delete(`/admin/category/${id}`);
+            router.delete(route('admin.category.destroy', id));
         }
     };
 
@@ -139,13 +144,13 @@ export default function AdminCategory({ categories }: Props) {
                                                 onClick={() => openEditModal(category)}
                                                 className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
                                             >
-                                                <Edit className="h-4 w-4" />
+                                                <Edit className="h-4 w-4 text-[#0123AA]" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(category.id)}
                                                 className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-4 w-4 text-[#0123AA]" />
                                             </button>
                                         </div>
                                     </div>
