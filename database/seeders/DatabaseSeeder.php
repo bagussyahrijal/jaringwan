@@ -6,6 +6,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,20 +17,13 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        // Create Admin User
+        Role::create(['name' => 'admin']);
+
         User::factory()->create([
-            'name' => 'Admin User',
+            'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'password' => bcrypt('password'),
-            'role' => 'admin',
-        ]);
-
-        // Create Regular User
-        User::factory()->create([
-            'name' => 'Regular User',
-            'email' => 'user@gmail.com',
-            'password' => bcrypt('password'),
-            'role' => 'user',
-        ]);
+            'email_verified_at' => now(),
+        ])->assignRole('admin');
     }
 }
