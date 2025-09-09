@@ -208,7 +208,8 @@ export default function ContactPage() {
                                             Kami siap melayani Anda setiap Sabtu - Kamis, pukul 08.00 sampai 17.00 WIB
                                         </p>
                                         <a
-                                            href="tel:+6289675626365"
+                                            target='_blank'
+                                            href="https://wa.me/6289675626365"
                                             className="inline-block mt-3 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-300"
                                         >
                                             Hubungi Sekarang

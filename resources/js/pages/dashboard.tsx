@@ -146,9 +146,8 @@ export default function Dashboard() {
                                     <Badge className="absolute top-3 left-3 bg-blue-600 text-white font-semibold">
                                         {product.badge}
                                     </Badge>
-                                    <div className={`absolute inset-0 bg-blue-600/80 flex items-center justify-center transition-opacity duration-300 ${
-                                        hoveredProduct === product.id ? 'opacity-100' : 'opacity-0'
-                                    }`}>
+                                    <div className={`absolute inset-0 bg-blue-600/80 flex items-center justify-center transition-opacity duration-300 ${hoveredProduct === product.id ? 'opacity-100' : 'opacity-0'
+                                        }`}>
                                         <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 font-semibold">
                                             Lihat Detail
                                             <ArrowRight className="ml-2 w-4 h-4" />
@@ -278,10 +277,11 @@ export default function Dashboard() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {ecommercePartners.map((partner, index) => (
-                            <Link
+                            <a
                                 key={index}
                                 href={partner.url}
                                 target="_blank"
+                                rel="noopener noreferrer"
                                 className="group"
                             >
                                 <Card className="h-48 cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-xl border-0 overflow-hidden">
@@ -299,7 +299,7 @@ export default function Dashboard() {
                                         </div>
                                     </CardContent>
                                 </Card>
-                            </Link>
+                            </a>
                         ))}
                     </div>
                 </div>
