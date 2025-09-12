@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\ImageTab;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,10 +16,12 @@ class ProductController extends Controller
     {
         $products = Product::with('category')->latest()->get();
         $categories = Category::all();
+        $aboutImage = ImageTab::where('category', 'Product and Gallery')->first();
 
         return Inertia::render('product', [
             'products' => $products,
-            'categories' => $categories
+            'categories' => $categories,
+            'aboutImage' => $aboutImage,
         ]);
     }
 

@@ -9,12 +9,7 @@ class GalleryItem extends Model
 {
     use HasUuids;
 
-    protected $guarded = ['created at', 'updated at'];
-
-    protected $fillable = [
-        'tag',
-        'gallery_id',
-    ];
+    protected $guarded = ['created_at', 'updated_at'];
 
     public function gallery()
     {

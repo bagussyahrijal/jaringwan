@@ -21,12 +21,21 @@ interface Product {
     updated_at: string;
 }
 
+interface ImageTab {
+    id: string;
+    category: string;
+    image: string;
+    created_at: string;
+    updated_at: string;
+}
+
 interface Props {
     products: Product[];
     categories: Category[];
+    aboutImage?: ImageTab;
 }
 
-export default function ProductPage({ products, categories }: Props) {
+export default function ProductPage({ products, categories, aboutImage }: Props) {
     const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
     const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
 
@@ -53,7 +62,7 @@ export default function ProductPage({ products, categories }: Props) {
                     <div
                         className="absolute inset-0 bg-cover bg-center"
                         style={{
-                            backgroundImage: 'url("assets/images/bg-hero-product.jpg")',
+                            backgroundImage: aboutImage?.image ? `url('/storage/${aboutImage.image}')` : 'url("assets/images/bg-hero-product.jpg")',
                         }}
                     />
                     <div className="relative z-10 container mx-auto flex h-full items-center px-4">

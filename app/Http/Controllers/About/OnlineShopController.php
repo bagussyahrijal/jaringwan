@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\About;
 
 use App\Http\Controllers\Controller;
+use App\Models\ImageTab;
 use App\Models\Information;
 use App\Models\OnlineShop;
 use Illuminate\Http\Request;
@@ -16,11 +17,13 @@ class OnlineShopController extends Controller
     {
         $shops = OnlineShop::latest()->get();
         $information = Information::latest()->get();
+        $aboutImage = ImageTab::where('category', 'Home and About')->first();
 
         return Inertia::render('about', [
             'shops' => $shops,
             'information' => $information,
-    ]);
+            'aboutImage' => $aboutImage,
+        ]);
     }
 
     public function index()

@@ -63,12 +63,21 @@ const companyValues = [
     },
 ];
 
+interface ImageTab {
+    id: string;
+    category: string;
+    image: string;
+    created_at: string;
+    updated_at: string;
+}
+
 interface AboutProps {
     shops?: OnlineShop[];
     information?: Information[];
+    aboutImage?: ImageTab;
 }
 
-export default function About({ shops = [], information = [] }: AboutProps) {
+export default function About({ shops = [], information = [], aboutImage }: AboutProps) {
     const [hoveredCard, setHoveredCard] = useState<number | null>(null);
     const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
 
@@ -90,7 +99,7 @@ export default function About({ shops = [], information = [] }: AboutProps) {
                 <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
                     style={{
-                        backgroundImage: "url('/assets/images/bg-hero.png')",
+                        backgroundImage: aboutImage?.image ? `url('/storage/${aboutImage.image}')` : "url('/assets/images/bg-hero.png')",
                     }}
                 />
 
@@ -124,7 +133,7 @@ export default function About({ shops = [], information = [] }: AboutProps) {
                 <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                     style={{
-                        backgroundImage: "url('/assets/images/bg-hero.png')",
+                        backgroundImage: aboutImage?.image ? `url('/storage/${aboutImage.image}')` : "url('/assets/images/bg-hero.png')",
                     }}
                 />
 

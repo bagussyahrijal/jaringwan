@@ -10,11 +10,7 @@ class Category extends Model
 {
     use HasUuids, HasFactory;
 
-    protected $guarded = ['created at', 'updated at'];
-
-    protected $fillable = [
-        'name',
-    ];
+    protected $guarded = ['created_at', 'updated_at`'];
 
     public function products()
     {
