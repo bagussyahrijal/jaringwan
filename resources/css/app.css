@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import './sidebar.css';
 
 @plugin 'tailwindcss-animate';
 
@@ -7,7 +9,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 .font-montserrat {
     font-family: 'Montserrat', sans-serif;
@@ -143,5 +144,181 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* Enhanced Sidebar Animations and Transitions */
+
+/* Smooth scrollbar for sidebar content */
+[data-slot="sidebar-content"]::-webkit-scrollbar {
+    width: 6px;
+}
+
+[data-slot="sidebar-content"]::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+[data-slot="sidebar-content"]::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 3px;
+}
+
+[data-slot="sidebar-content"]::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.5);
+}
+
+/* Dark mode scrollbar */
+.dark [data-slot="sidebar-content"]::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.3);
+}
+
+.dark [data-slot="sidebar-content"]::-webkit-scrollbar-thumb:hover {
+    background: rgba(75, 85, 99, 0.5);
+}
+
+/* Smooth transition for sidebar state changes */
+[data-slot="sidebar"] {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced focus states */
+[data-slot="sidebar-menu-button"]:focus-visible {
+    outline: 2px solid theme('colors.blue.500');
+    outline-offset: 2px;
+}
+
+/* Ripple effect for menu items */
+.menu-item-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-item-ripple::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+    z-index: 0;
+}
+
+.menu-item-ripple:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+/* Gradient border animation */
+.gradient-border {
+    position: relative;
+    background: linear-gradient(45deg, transparent, transparent);
+    background-clip: padding-box;
+}
+
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    background: linear-gradient(45deg, theme('colors.blue.400'), theme('colors.purple.400'));
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: subtract;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gradient-border:hover::before {
+    opacity: 1;
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+    [data-slot="sidebar"] {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    [data-slot="sidebar-header"] {
+        padding: 1rem;
+    }
+
+    [data-slot="sidebar-content"] {
+        padding: 0 1rem;
+    }
+
+    [data-slot="sidebar-footer"] {
+        padding: 1rem;
+    }
+}
+
+/* Collapsible icon state animations */
+[data-collapsible="icon"] [data-slot="sidebar-menu-button"] {
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+[data-collapsible="icon"] [data-slot="sidebar-menu-button"] span {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover reveal for collapsed sidebar */
+[data-collapsible="icon"]:hover [data-slot="sidebar-menu-button"] span {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Loading skeleton animation */
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+.dark .skeleton {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200px 100%;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+
+    [data-slot="sidebar"],
+    [data-slot="sidebar-menu-button"],
+    .menu-item-ripple::before,
+    .gradient-border::before {
+        transition: none;
+    }
+
+    .skeleton {
+        animation: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    [data-slot="sidebar"] {
+        border-color: theme('colors.gray.900');
+    }
+
+    [data-slot="sidebar-menu-button"][data-active="true"] {
+        background: theme('colors.blue.700');
+        color: white;
     }
 }

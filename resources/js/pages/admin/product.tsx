@@ -9,6 +9,7 @@ import { route } from 'ziggy-js';
 import { motion } from 'framer-motion';
 import { Edit, Plus, Trash2, Upload, X } from 'lucide-react';
 import React, { useState } from 'react';
+import AdminLayout from '@/layouts/admin-layout';
 
 interface Product {
     id: number;
@@ -124,7 +125,7 @@ export default function AdminProduct({ products, categories }: Props) {
     };
 
     return (
-        <AppLayout>
+        <AdminLayout>
             <Head title="Kelola Produk" />
 
             <div className="min-h-screen bg-gray-50">
@@ -401,6 +402,6 @@ export default function AdminProduct({ products, categories }: Props) {
                     </motion.div>
                 </div>
             )}
-        </AppLayout>
+        </AdminLayout>
     );
 }

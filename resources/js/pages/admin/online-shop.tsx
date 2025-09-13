@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import AdminLayout from '@/layouts/admin-layout';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { motion } from 'framer-motion';
@@ -110,7 +111,7 @@ export default function AdminOnlineShop({ shops }: Props) {
     };
 
     return (
-        <AppLayout>
+        <AdminLayout>
             <Head title="Kelola Toko Online" />
 
             <div className="min-h-screen bg-gray-50">
@@ -367,6 +368,6 @@ export default function AdminOnlineShop({ shops }: Props) {
                     </motion.div>
                 </div>
             )}
-        </AppLayout>
+        </AdminLayout>
     );
 }
