@@ -3,18 +3,16 @@
 use App\Http\Controllers\About\InformationController;
 use App\Http\Controllers\About\OnlineShopController;
 use App\Http\Controllers\Gallery\GalleryController;
+use App\Http\Controllers\ImageTabController;
 use App\Http\Controllers\Product\CategoryController;
 use App\Http\Controllers\Product\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', [ImageTabController::class, 'homeIndex'])->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->name('dashboard');
+Route::get('dashboard', [ImageTabController::class, 'dashboardIndex'])->name('dashboard');
+
 Route::get('about', [OnlineShopController::class, 'publicIndex'])->name('about');
 
 Route::get('product', [ProductController::class, 'publicIndex'])->name('product');
@@ -59,6 +57,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(fu
     Route::post('/information', [InformationController::class, 'store'])->name('admin.information.store');
     Route::post('/information/{id}', [InformationController::class, 'update'])->name('admin.information.update');
     Route::delete('/information/{id}', [InformationController::class, 'destroy'])->name('admin.information.destroy');
+
+    //Admin Image Tab Routes
+    Route::get('/image-tab', [ImageTabController::class, 'index'])->name('admin.image-tab.index');
+    Route::get('/image-tab/{id}', [ImageTabController::class, 'homeShow'])->name('admin.image-tab.show');
+    Route::post('/image-tab', [ImageTabController::class, 'store'])->name('admin.image-tab.store');
+    Route::post('/image-tab/{id}', [ImageTabController::class, 'update'])->name('admin.image-tab.update');
+    Route::delete('/image-tab/{id}', [ImageTabController::class, 'destroy'])->name('admin.image-tab.destroy');
 });
 
 

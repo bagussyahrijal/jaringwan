@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Gallery;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gallery;
+use App\Models\ImageTab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,9 +15,11 @@ class GalleryController extends Controller
     public function publicIndex()
     {
         $galleries = Gallery::with('galleryItems')->latest()->get();
+        $aboutImage = ImageTab::where('category', 'Product and Gallery')->first();
 
         return Inertia::render('gallery', [
             'galleries' => $galleries,
+            'aboutImage' => $aboutImage,
         ]);
     }
 

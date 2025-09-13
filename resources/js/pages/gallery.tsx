@@ -24,11 +24,20 @@ interface GalleryItem {
     tags?: string[];
 }
 
-interface Props {
-    galleries: GalleryItem[];
+interface ImageTab {
+    id: string;
+    category: string;
+    image: string;
+    created_at: string;
+    updated_at: string;
 }
 
-export default function GalleryPage({ galleries }: Props) {
+interface Props {
+    galleries: GalleryItem[];
+    aboutImage?: ImageTab;
+}
+
+export default function GalleryPage({ galleries, aboutImage }: Props) {
     const [selectedCategory, setSelectedCategory] = useState('Semua');
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
@@ -69,7 +78,7 @@ export default function GalleryPage({ galleries }: Props) {
                     <div
                         className="absolute inset-0 bg-cover bg-center"
                         style={{
-                            backgroundImage: 'url("assets/images/bg-hero-product.jpg")',
+                            backgroundImage: aboutImage?.image ? `url('/storage/${aboutImage.image}')` : 'url("assets/images/bg-hero-product.jpg")',
                         }}
                     />
                     <div className="relative z-10 container mx-auto flex h-full items-center px-4">
