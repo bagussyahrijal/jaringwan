@@ -34,21 +34,21 @@ export default function ContactPage() {
     const platforms = [
         {
             name: 'Shopee',
-            icon: '/images/platforms/shopee.png',
+            icon: 'assets/images/platforms/shopee.png',
             url: 'https://shopee.co.id/jaringwan',
             color: '#FF5722',
             description: 'Belanja mudah di Shopee'
         },
         {
             name: 'TikTok Shop',
-            icon: '/images/platforms/tiktok.png',
+            icon: 'assets/images/platforms/tiktok.png',
             url: 'https://shop.tiktok.com/jaringwan',
             color: '#000000',
             description: 'Temukan produk terbaru'
         },
         {
             name: 'Tokopedia',
-            icon: '/images/platforms/tokopedia.png',
+            icon: 'assets/images/platforms/tokopedia.png',
             url: 'https://tokopedia.com/jaringwan',
             color: '#42A545',
             description: 'Mulai dari sini'
@@ -151,7 +151,7 @@ export default function ContactPage() {
                                                         <img
                                                             src={platform.icon}
                                                             alt={platform.name}
-                                                            className="w-8 h-8"
+                                                            className="w-12 h-12 object-contain"
                                                             onError={(e) => {
                                                                 e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iI2ZmZiIvPgo8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzMyIgZm9udC1zaXplPSIxMiI+8J+Qsz08L3RleHQ+Cjwvc3ZnPgo=';
                                                             }}

@@ -61,19 +61,19 @@ const products = [
 const ecommercePartners = [
     {
         name: 'Shopee',
-        logo: '/assets/images/shopee-logo.png',
+        logo: '/assets/images/platforms/shopee.png',
         color: 'bg-orange-500',
         url: 'https://shopee.co.id',
     },
     {
         name: 'TikTok',
-        logo: '/assets/images/tiktok-logo.png',
+        logo: '/assets/images/platforms/tiktok.png',
         color: 'bg-black',
         url: 'https://tiktok.com',
     },
     {
         name: 'Tokopedia',
-        logo: '/assets/images/tokopedia-logo.png',
+        logo: '/assets/images/platforms/tokopedia.png',
         color: 'bg-green-500',
         url: 'https://tokopedia.com',
     },
@@ -291,10 +291,10 @@ export default function Dashboard({ homeImage }: Props) {
                         {ecommercePartners.map((partner, index) => (
                             <Link key={index} href={partner.url} target="_blank" className="group">
                                 <Card className="h-48 transform cursor-pointer overflow-hidden border-0 transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                                    <CardContent className={`${partner.color} relative flex h-full items-center justify-center p-8`}>
+                                    <CardContent className={`bg-black relative flex h-full items-center justify-center p-8`}>
                                         <div className="text-center">
-                                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-white transition-transform duration-300 group-hover:scale-110">
-                                                <PlaceholderPattern className="h-10 w-10 stroke-gray-400" />
+                                            <div className={`${partner.color} mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xltransition-transform duration-300 group-hover:scale-110`}>
+                                                <img src={partner.logo} alt={partner.name} className="h-10 w-10 object-contain" />
                                             </div>
                                             <h3 className="text-xl font-bold text-white">{partner.name}</h3>
                                         </div>
@@ -305,7 +305,7 @@ export default function Dashboard({ homeImage }: Props) {
                                         </div>
                                     </CardContent>
                                 </Card>
-                            </a>
+                            </Link>
                         ))}
                     </div>
                 </div>
