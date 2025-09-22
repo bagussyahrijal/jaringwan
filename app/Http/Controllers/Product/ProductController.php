@@ -25,11 +25,11 @@ class ProductController extends Controller
         ]);
     }
 
-    public function index() 
+    public function index()
     {
         $products = Product::with('category')->latest()->get();
         $categories = Category::all();
-    
+
         return Inertia::render('admin/product', [
             'products' => $products,
             'categories' => $categories
@@ -54,6 +54,7 @@ class ProductController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'url_shop' => 'nullable|url',
         ]);
 
         $image = $request->file('image');
@@ -61,13 +62,13 @@ class ProductController extends Controller
 
         $data = $request->all();
         $data['image'] = $imagePath;
-        
+
         Product::create($data);
 
         return redirect()->route('admin.product.index')->with('success', 'Product created successfully.');
     }
 
-    public function update(Request $request, string $id) 
+    public function update(Request $request, string $id)
     {
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -76,6 +77,7 @@ class ProductController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'url_shop' => 'nullable|url',
         ]);
 
         $product = Product::findOrFail($id);
@@ -92,6 +94,7 @@ class ProductController extends Controller
                 'description' => $request->input('description'),
                 'price' => $request->input('price'),
                 'stock' => $request->input('stock'),
+                'url_shop' => $request->input('url_shop'),
             ]);
         } else {
             $product->update([
@@ -100,6 +103,7 @@ class ProductController extends Controller
                 'description' => $request->input('description'),
                 'price' => $request->input('price'),
                 'stock' => $request->input('stock'),
+                'url_shop' => $request->input('url_shop'),
             ]);
         }
 

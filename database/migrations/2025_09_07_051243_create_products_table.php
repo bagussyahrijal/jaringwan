@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('description');
             $table->bigInteger('price');
             $table->bigInteger('stock');
+            $table->string('url_shop')->nullable();
             $table->foreignUuid('category_id')->constrained('categories')->onDelete('cascade');
             $table->timestamps();
         });

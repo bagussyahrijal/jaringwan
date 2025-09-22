@@ -127,50 +127,6 @@ export default function About({ shops = [], information = [], aboutImage }: Abou
                 </div>
             </section>
 
-            {/* Mission Section with Background Image */}
-            <section className="relative overflow-hidden py-24">
-                {/* Background Image */}
-                <div
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                    style={{
-                        backgroundImage: aboutImage?.image ? `url('/storage/${aboutImage.image}')` : "url('/assets/images/bg-hero.png')",
-                    }}
-                />
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/60" />
-
-                {/* Content */}
-                <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white">
-                    <p className="mb-8 text-lg leading-relaxed font-light md:text-xl">
-                        <span className="font-semibold text-blue-300">sedikit kenalan yuk dengan Jaring Wan</span>
-                        <br />
-                        Jaring WAN hadir untuk memudahkan anda dalam berbagai kebutuhan - baik untuk
-                        <span className="font-semibold text-yellow-300"> perikanan atau hobi burung</span>, maupun memenuhi kegunaan lainnya dari
-                        berbagai
-                        <span className="font-semibold text-green-300"> jenis jaring yang kuat namun tidak terlalu berat</span>
-                    </p>
-
-                    <div className="mt-16 text-center">
-                        <h2 className="font-montserrat mb-4 text-4xl font-bold md:text-5xl">
-                            SETAHUN BERSAMA
-                            <br />
-                            <span className="text-blue-300">JARINGWAN</span>
-                        </h2>
-                        <p className="mx-auto mb-8 max-w-2xl text-gray-300">
-                            Terima kasih telah nelayan kepercayaan tahun dengan jaring berkualitas yang siap pakai dan mendukung kebutuhan sehari-hari
-                            Anda.
-                        </p>
-                        <Button
-                            size="lg"
-                            className="transform rounded-full bg-white px-8 py-3 font-semibold text-blue-900 transition-all duration-300 hover:scale-105 hover:bg-gray-100"
-                        >
-                            Lihat Produk
-                            <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                    </div>
-                </div>
-            </section>
 
             {/* Online Shops Section */}
             <section className="bg-white py-16">
@@ -189,7 +145,7 @@ export default function About({ shops = [], information = [], aboutImage }: Abou
                             shops.map((shop, index) => (
                                 <Card
                                     key={shop.id}
-                                    className="group transform cursor-pointer overflow-hidden border-0 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                                    className="py-0 group transform cursor-pointer overflow-hidden border-0 transition-all duration-300 hover:scale-105 hover:shadow-xl"
                                     onMouseEnter={() => setHoveredCard(index)}
                                     onMouseLeave={() => setHoveredCard(null)}
                                 >
@@ -206,18 +162,6 @@ export default function About({ shops = [], information = [], aboutImage }: Abou
                                                     </div>
                                                 </>
                                             )}
-                                            <div
-                                                className={`absolute inset-0 flex items-center justify-center bg-blue-600/90 transition-opacity duration-300 ${
-                                                    hoveredCard === index ? 'opacity-100' : 'opacity-0'
-                                                }`}
-                                            >
-                                                <div className="p-4 text-center text-white">
-                                                    <h3 className="mb-2 text-2xl font-bold">{shop.name}</h3>
-                                                    <Badge variant="secondary" className="bg-white/20 text-white">
-                                                        Toko Online
-                                                    </Badge>
-                                                </div>
-                                            </div>
                                         </div>
 
                                         {/* Content */}
@@ -229,7 +173,7 @@ export default function About({ shops = [], information = [], aboutImage }: Abou
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
-                                                    className="transition-colors group-hover:bg-gray-900 group-hover:text-white"
+                                                    className="hover:cursor-pointer transition-colors hover:bg-gray-900 hover:text-white"
                                                     onClick={() => window.open(shop.url, '_blank')}
                                                 >
                                                     Lihat
@@ -259,19 +203,17 @@ export default function About({ shops = [], information = [], aboutImage }: Abou
                         {features.map((feature, index) => (
                             <div
                                 key={index}
-                                className="group cursor-pointer text-center"
+                                className="group text-center"
                                 onMouseEnter={() => setHoveredFeature(index)}
                                 onMouseLeave={() => setHoveredFeature(null)}
                             >
                                 <div
-                                    className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 transition-all duration-300 ${
-                                        hoveredFeature === index ? 'scale-110 bg-blue-600' : ''
-                                    }`}
+                                    className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 transition-all duration-300 hover:scale-110 hover:bg-blue-600
+                                        }`}
                                 >
                                     <feature.icon
-                                        className={`h-10 w-10 transition-colors duration-300 ${
-                                            hoveredFeature === index ? 'text-white' : 'text-blue-600'
-                                        }`}
+                                        className={`h-10 w-10 transition-colors duration-300
+                                            }`}
                                     />
                                 </div>
                                 <h3 className="mb-2 text-xl font-bold text-gray-900">{feature.title}</h3>
@@ -311,57 +253,7 @@ export default function About({ shops = [], information = [], aboutImage }: Abou
                 </div>
             </section>
 
-            {/* Statistics Section */}
-            <section className="bg-blue-600 py-16 text-white">
-                <div className="mx-auto max-w-7xl px-4">
-                    <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
-                        <div className="group cursor-pointer">
-                            <div className="mb-2 text-4xl font-bold transition-transform duration-300 group-hover:scale-110 md:text-5xl">1000+</div>
-                            <div className="text-blue-200">Nelayan Terpercaya</div>
-                        </div>
-                        <div className="group cursor-pointer">
-                            <div className="mb-2 text-4xl font-bold transition-transform duration-300 group-hover:scale-110 md:text-5xl">20+</div>
-                            <div className="text-blue-200">Tahun Pengalaman</div>
-                        </div>
-                        <div className="group cursor-pointer">
-                            <div className="mb-2 text-4xl font-bold transition-transform duration-300 group-hover:scale-110 md:text-5xl">50+</div>
-                            <div className="text-blue-200">Jenis Produk</div>
-                        </div>
-                        <div className="group cursor-pointer">
-                            <div className="mb-2 text-4xl font-bold transition-transform duration-300 group-hover:scale-110 md:text-5xl">99%</div>
-                            <div className="text-blue-200">Kepuasan Pelanggan</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
-            {/* CTA Section */}
-            <section className="bg-gray-900 py-16 text-white">
-                <div className="mx-auto max-w-4xl px-4 text-center">
-                    <Fish className="mx-auto mb-6 h-16 w-16 text-blue-400" />
-                    <h2 className="font-montserrat mb-4 text-3xl font-bold md:text-4xl">Bergabunglah dengan Komunitas Nelayan</h2>
-                    <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-300">
-                        Jadilah bagian dari ribuan nelayan yang telah merasakan kualitas dan kepercayaan produk JARINGWAN selama bertahun-tahun.
-                    </p>
-                    <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                        <Button
-                            size="lg"
-                            className="transform rounded-full bg-blue-600 px-8 py-3 font-semibold transition-all duration-300 hover:scale-105 hover:bg-blue-700"
-                        >
-                            <Heart className="mr-2 h-5 w-5" />
-                            Mulai Berbelanja
-                        </Button>
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="rounded-full border-white px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white hover:text-gray-900"
-                        >
-                            Hubungi Kami
-                            <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                    </div>
-                </div>
-            </section>
         </AppLayout>
     );
 }

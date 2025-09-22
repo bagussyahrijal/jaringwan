@@ -190,16 +190,18 @@ export default function ProductPage({ products, categories, aboutImage }: Props)
                                 ))}
                             </motion.div>
                             {/* Load More Button */}
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.6, delay: 0.8 }}
-                                className="mt-12 text-center"
-                            >
-                                <button className="transform rounded-lg bg-[#0123AA] px-8 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-blue-700">
-                                    Muat Lebih Banyak Produk
-                                </button>
-                            </motion.div>
+                            {filteredProducts.length >= 6 && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.6, delay: 0.8 }}
+                                    className="mt-12 text-center"
+                                >
+                                    <button className="transform rounded-lg bg-[#0123AA] px-8 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-blue-700">
+                                        Muat Lebih Banyak Produk
+                                    </button>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </div>

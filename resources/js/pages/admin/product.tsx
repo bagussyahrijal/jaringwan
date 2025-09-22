@@ -18,6 +18,7 @@ interface Product {
     price: number;
     stock: number;
     image: string;
+    url_shop?: string;
     category_id: number;
     category: {
         id: number;
@@ -49,6 +50,7 @@ export default function AdminProduct({ products, categories }: Props) {
         stock: '',
         category_id: '',
         image: null as File | null,
+        url_shop: '',
     });
 
     const openCreateModal = () => {
@@ -67,6 +69,7 @@ export default function AdminProduct({ products, categories }: Props) {
             stock: product.stock.toString(),
             category_id: product.category_id.toString(),
             image: null,
+            url_shop: product.url_shop || '',
         });
         setPreviewImage(`/storage/${product.image}`);
         setShowModal(true);
@@ -278,6 +281,7 @@ export default function AdminProduct({ products, categories }: Props) {
                                                 onChange={handleImageChange}
                                                 className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                                                 onClick={(e) => e.stopPropagation()}
+                                                required
                                             />
                                         </div>
                                         {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
@@ -372,6 +376,21 @@ export default function AdminProduct({ products, categories }: Props) {
                                         />
                                         {errors.stock && <p className="mt-1 text-sm text-red-600">{errors.stock}</p>}
                                     </div>
+                                </div>
+                                {/* URL Shop */}
+                                <div>
+                                    <Label htmlFor="url_shop" className="text-sm font-semibold text-gray-700">
+                                        URL Toko (opsional)
+                                    </Label>
+                                    <Input
+                                        id="url_shop"
+                                        type="url"
+                                        value={data.url_shop}
+                                        onChange={(e) => setData('url_shop', e.target.value)}
+                                        placeholder="https://example.com"
+                                        className="mt-2"
+                                    />
+                                    {errors.url_shop && <p className="mt-1 text-sm text-red-600">{errors.url_shop}</p>}
                                 </div>
 
                                 {/* Form Actions */}

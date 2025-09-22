@@ -35,21 +35,21 @@ export default function ContactPage() {
         {
             name: 'Shopee',
             icon: 'assets/images/platforms/shopee.png',
-            url: 'https://shopee.co.id/jaringwan',
+            url: 'https://shopee.co.id/jaring_wan?entryPoint=ShopBySearch&searchKeyword=jaringwan',
             color: '#FF5722',
             description: 'Belanja mudah di Shopee'
         },
         {
             name: 'TikTok Shop',
             icon: 'assets/images/platforms/tiktok.png',
-            url: 'https://shop.tiktok.com/jaringwan',
+            url: 'https://vt.tiktok.com/ZSDusyhfE/?page=Mall',
             color: '#000000',
             description: 'Temukan produk terbaru'
         },
         {
             name: 'Tokopedia',
             icon: 'assets/images/platforms/tokopedia.png',
-            url: 'https://tokopedia.com/jaringwan',
+            url: 'https://www.tokopedia.com/jaringwan',
             color: '#42A545',
             description: 'Mulai dari sini'
         }

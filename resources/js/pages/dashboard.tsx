@@ -17,44 +17,39 @@ interface ImageTab {
     updated_at: string;
 }
 
+interface Product {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    image: string;
+    url_shop: string;
+    category_id: number;
+    category: {
+        id: number;
+        name: string;
+    };
+    created_at: string;
+    updated_at: string;
+}
+
+interface Category {
+    id: number;
+    name: string;
+}
+
 interface Props {
     homeImage?: ImageTab;
+    products: Product[];
+    categories: Category[];
+
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
         href: dashboard().url,
-    },
-];
-
-const products = [
-    {
-        id: 1,
-        title: 'Jaring Ikan Siap Pakai',
-        price: 'Rp 50.000',
-        image: '/assets/images/jaring-1.jpg',
-        rating: 4.8,
-        sold: 127,
-        badge: 'SIAP PAKAI',
-    },
-    {
-        id: 2,
-        title: 'Jaring Ikan Siap Pakai',
-        price: 'Rp 65.000',
-        image: '/assets/images/jaring-2.jpg',
-        rating: 4.9,
-        sold: 89,
-        badge: 'SIAP PAKAI',
-    },
-    {
-        id: 3,
-        title: 'Jaring Ikan Siap Pakai',
-        price: 'Rp 75.000',
-        image: '/assets/images/jaring-3.jpg',
-        rating: 4.7,
-        sold: 156,
-        badge: 'SIAP PAKAI',
     },
 ];
 
@@ -79,8 +74,35 @@ const ecommercePartners = [
     },
 ];
 
-export default function Dashboard({ homeImage }: Props) {
+export default function Dashboard({ homeImage, products, categories }: Props) {
     const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+
+    // Format price helper function
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+        }).format(price);
+    };
+
+    // Helper function to get proper image URL
+    const getImageUrl = (imagePath: string) => {
+        if (!imagePath) return undefined;
+
+        // If it already starts with /storage/, return as is
+        if (imagePath.startsWith('/storage/')) {
+            return imagePath;
+        }
+
+        // If it starts with http, return as is (external URL)
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+
+        // Otherwise, prepend /storage/
+        return `/storage/${imagePath}`;
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -113,17 +135,11 @@ export default function Dashboard({ homeImage }: Props) {
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <Button
                                 size="lg"
-                                className="transform rounded-full bg-blue-600 px-8 py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-blue-700"
+                                onClick={() => { window.location.href = '/product'; }}
+                                className="transform rounded-full bg-blue-600 px-8 py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-blue-700 hover:cursor-pointer"
                             >
                                 Jelajahi Produk
                                 <ArrowRight className="ml-2 h-5 w-5" />
-                            </Button>
-                            <Button
-                                size="lg"
-                                variant="outline"
-                                className="rounded-full border-white px-8 py-3 font-semibold text-white transition-all duration-300 hover:bg-white hover:text-blue-900"
-                            >
-                                Tentang Kami
                             </Button>
                         </div>
                     </div>
@@ -148,100 +164,86 @@ export default function Dashboard({ homeImage }: Props) {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                        {products.map((product) => (
-                            <Card
-                                key={product.id}
-                                className="group transform cursor-pointer overflow-hidden border-0 transition-all duration-300 hover:scale-105 hover:shadow-xl"
-                                onMouseEnter={() => setHoveredProduct(product.id)}
-                                onMouseLeave={() => setHoveredProduct(null)}
-                            >
-                                <div className="relative overflow-hidden">
-                                    <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
-                                        <PlaceholderPattern className="h-full w-full stroke-blue-300/30" />
-                                    </div>
-                                    <Badge className="absolute top-3 left-3 bg-blue-600 font-semibold text-white">{product.badge}</Badge>
-                                    <div
-                                        className={`absolute inset-0 flex items-center justify-center bg-blue-600/80 transition-opacity duration-300 ${
-                                            hoveredProduct === product.id ? 'opacity-100' : 'opacity-0'
-                                        }`}
-                                    >
-                                        <Button size="lg" className="bg-white font-semibold text-blue-600 hover:bg-gray-100">
-                                            Lihat Detail
-                                            <ArrowRight className="ml-2 h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                                <CardContent className="p-6">
-                                    <CardTitle className="mb-2 text-lg font-semibold text-gray-900">{product.title}</CardTitle>
-                                    <div className="mb-3 flex items-center justify-between">
-                                        <span className="text-2xl font-bold text-blue-600">{product.price}</span>
-                                        <div className="flex items-center space-x-1">
-                                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                            <span className="text-sm text-gray-600">{product.rating}</span>
+                    {products && products.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                            {products.slice(0, 6).map((product) => (
+                                <Card
+                                    key={product.id}
+                                    className="py-0 group transform cursor-pointer overflow-hidden border-0 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                                    onMouseEnter={() => setHoveredProduct(product.id)}
+                                    onMouseLeave={() => setHoveredProduct(null)}
+                                >
+                                    <div className="relative overflow-hidden">
+                                        <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
+                                            {product.image ? (
+                                                <img
+                                                    src={getImageUrl(product.image)}
+                                                    alt={product.name || 'Product Image'}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : null}
+                                            <PlaceholderPattern
+                                                className={`placeholder-pattern h-full w-full stroke-blue-300/30 ${product.image ? 'hidden' : ''}`}
+                                            />
                                         </div>
+
+                                        {/* Category Badge */}
+                                        <Badge className="absolute top-3 left-3 bg-blue-600 font-semibold text-white">
+                                            {product.category?.name || 'Produk'}
+                                        </Badge>
+
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-gray-500">{product.sold} terjual</span>
-                                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                                            <ShoppingBag className="mr-1 h-4 w-4" />
-                                            Beli
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+
+                                    <CardContent className="p-6">
+                                        <CardTitle className="mb-2 text-lg font-semibold text-gray-900 line-clamp-2">
+                                            {product.name}
+                                        </CardTitle>
+
+                                        {product.description && (
+                                            <p className="mb-3 text-sm text-gray-600 line-clamp-2">
+                                                {product.description}
+                                            </p>
+                                        )}
+
+                                        <div className="mb-3 flex items-center justify-between">
+                                            <span className="text-2xl font-bold text-blue-600">
+                                                {formatPrice(product.price)}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-gray-500">
+                                                Stok: {product.stock}
+                                            </span>
+                                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 hover:cursor-pointer" onClick={() => { window.open(product.url_shop, '_blank'); }}>
+                                                <ShoppingBag className="mr-1 h-4 w-4" />
+                                                Beli
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12">
+                            <div className="mb-4">
+                                <PlaceholderPattern className="h-32 w-32 mx-auto stroke-gray-300" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-600 mb-2">Produk Tidak Tersedia</h3>
+                            <p className="text-gray-500">Produk sedang dalam proses update. Silakan coba lagi nanti.</p>
+                        </div>
+                    )}
 
                     <div className="mt-12 text-center">
                         <Button
                             size="lg"
                             variant="outline"
-                            className="rounded-full border-blue-600 px-8 py-3 font-semibold text-blue-600 hover:bg-blue-600 hover:text-white"
+                            onClick={() => { window.location.href = '/product'; }}
+                            className="rounded-full border-blue-600 px-8 py-3 font-semibold text-blue-600 hover:bg-blue-600 hover:text-white hover:cursor-pointer"
                         >
                             Lihat Semua Produk
                             <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
-                    </div>
-                </div>
-            </section>
-
-            {/* About Section */}
-            <section className="bg-white py-16">
-                <div className="mx-auto max-w-7xl px-4">
-                    <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-                        <div>
-                            <h2 className="font-montserrat mb-6 text-3xl font-bold text-gray-900 md:text-4xl">JARING IKAN TIMAH</h2>
-                            <p className="mb-8 text-lg leading-relaxed text-gray-600">
-                                Dengan pengalaman lebih dari 20 tahun, kami telah menjadi partner terpercaya para nelayan Indonesia. Jaring ikan timah
-                                berkualitas tinggi dengan daya tahan maksimal untuk berbagai kondisi laut.
-                            </p>
-                            <div className="space-y-4">
-                                <div className="flex items-center space-x-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                                        <Users className="h-4 w-4 text-blue-600" />
-                                    </div>
-                                    <span className="text-gray-700">Dipercaya 1000+ Nelayan</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                                        <Star className="h-4 w-4 text-blue-600" />
-                                    </div>
-                                    <span className="text-gray-700">Kualitas Premium Terjamin</span>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                                        <MapPin className="h-4 w-4 text-blue-600" />
-                                    </div>
-                                    <span className="text-gray-700">Melayani Seluruh Indonesia</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="relative">
-                            <div className="aspect-video overflow-hidden rounded-xl bg-gradient-to-br from-blue-100 to-blue-200">
-                                <PlaceholderPattern className="h-full w-full stroke-blue-300/30" />
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -290,10 +292,10 @@ export default function Dashboard({ homeImage }: Props) {
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         {ecommercePartners.map((partner, index) => (
                             <Link key={index} href={partner.url} target="_blank" className="group">
-                                <Card className="h-48 transform cursor-pointer overflow-hidden border-0 transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                                    <CardContent className={`bg-black relative flex h-full items-center justify-center p-8`}>
+                                <Card className="h-48 transform cursor-pointer overflow-hidden border-0 transition-all duration-300 hover:scale-105 hover:shadow-xl bg-gray-900">
+                                    <CardContent className={` relative flex h-full items-center justify-center p-8`}>
                                         <div className="text-center">
-                                            <div className={`${partner.color} mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xltransition-transform duration-300 group-hover:scale-110`}>
+                                            <div className={`${partner.color} mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl `}>
                                                 <img src={partner.logo} alt={partner.name} className="h-10 w-10 object-contain" />
                                             </div>
                                             <h3 className="text-xl font-bold text-white">{partner.name}</h3>
@@ -319,17 +321,9 @@ export default function Dashboard({ homeImage }: Props) {
                         Hubungi kami sekarang untuk konsultasi gratis dan dapatkan penawaran terbaik untuk kebutuhan jaring ikan Anda.
                     </p>
                     <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                        <Button size="lg" className="rounded-full bg-white px-8 py-3 font-semibold text-blue-600 hover:bg-gray-100">
+                        <Button size="lg" className="rounded-full bg-white px-8 py-3 font-semibold text-blue-600 hover:bg-gray-100 hover:cursor-pointer" onClick={() => { window.location.href = '/contact'}}>
                             <Phone className="mr-2 h-5 w-5" />
                             Hubungi Kami
-                        </Button>
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="rounded-full border-white px-8 py-3 font-semibold text-white hover:bg-white hover:text-blue-600"
-                        >
-                            <Mail className="mr-2 h-5 w-5" />
-                            Kirim Email
                         </Button>
                     </div>
                 </div>

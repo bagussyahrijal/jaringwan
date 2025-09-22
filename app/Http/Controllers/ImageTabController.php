@@ -6,6 +6,8 @@ use App\Models\ImageTab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use App\Models\Product;
+use App\Models\Category;
 
 class ImageTabController extends Controller
 {
@@ -34,9 +36,14 @@ class ImageTabController extends Controller
 
     public function dashboardIndex()
     {
-        $homeImage = ImageTab::where('category', 'Home and About')->first();
+        $products = Product::with('category')->latest()->get();
+        $categories = Category::all();
+        $aboutImage = ImageTab::where('category', 'Product and Gallery')->first();
+
         return Inertia::render('dashboard', [
-            'homeImage' => $homeImage,
+            'products' => $products,
+            'categories' => $categories,
+            'aboutImage' => $aboutImage,
         ]);
     }
 

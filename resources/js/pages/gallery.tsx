@@ -294,7 +294,7 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                             </motion.div>
 
                             {/* Load More Button */}
-                            {filteredItems.length > 0 && (
+                            {filteredItems.length >= 6 && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
