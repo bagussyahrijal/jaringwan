@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\About\InformationController;
 use App\Http\Controllers\About\OnlineShopController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Gallery\GalleryController;
 use App\Http\Controllers\ImageTabController;
 use App\Http\Controllers\Product\CategoryController;
@@ -26,7 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {});
 
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(function() {
     Route::redirect('/', '/admin/dashboard');
-    Route::get('/dashboard', [ProductController::class, 'adminDashboard'])->name('admin.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     //Admin Product Routes
     Route::get('/product', [ProductController::class, 'index'])->name('admin.product.index');
