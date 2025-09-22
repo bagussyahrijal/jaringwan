@@ -28,13 +28,13 @@ declare const route: any;
 export default function AdminInformation({ information }: Props) {
     const [showModal, setShowModal] = useState(false);
     const [editingInformation, setEditingInformation] = useState<Information | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false); // Add custom loading state
 
-    const { data, setData, post, processing, errors, reset } = useForm<{
+    const { data, setData, post, put, processing, errors, reset } = useForm<{
         title: string;
         header: string;
         subheader: string;
         content: string;
-        _method?: string;
     }>({
         title: '',
         header: '',
@@ -76,22 +76,67 @@ export default function AdminInformation({ information }: Props) {
         e.preventDefault();
 
         if (editingInformation) {
-            // method spoofing for Laravel
-            setData((prev) => ({ ...prev, _method: 'put' }));
-
-            router.post(route('admin.information.update', editingInformation.id), data, {
+            // Use the form's put method for updates
+            put(route('admin.information.update', editingInformation.id), {
                 onSuccess: () => closeModal(),
+                onError: (errors) => {
+                    console.log('Update errors:', errors);
+                }
+            });
+        } else {
+            // Use the form's post method for creates
+            post(route('admin.information.store'), {
+                onSuccess: () => closeModal(),
+                onError: (errors) => {
+                    console.log('Create errors:', errors);
+                }
+            });
+        }
+    };
+
+    // Alternative approach using router with custom loading state
+    const handleSubmitWithCustomLoading = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        if (editingInformation) {
+            // method spoofing for Laravel
+            const submitData = { ...data, _method: 'PUT' };
+
+            router.post(route('admin.information.update', editingInformation.id), submitData, {
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                }
             });
         } else {
             router.post(route('admin.information.store'), data, {
-                onSuccess: () => closeModal(),
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                }
             });
         }
     };
 
     const handleDelete = (id: string) => {
         if (confirm('Apakah Anda yakin ingin menghapus informasi ini?')) {
-            router.delete(route('admin.information.destroy', id));
+            setIsSubmitting(true);
+            router.delete(route('admin.information.destroy', id), {
+                onFinish: () => setIsSubmitting(false)
+            });
         }
     };
 
@@ -117,7 +162,7 @@ export default function AdminInformation({ information }: Props) {
                                 <p className="text-gray-600">Kelola informasi perusahaan Anda</p>
                             </div>
                             {!hasInformation && (
-                                <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600">
+                                <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600 hover:cursor-pointer">
                                     <Plus className="mr-2 h-4 w-4" />
                                     Tambah Informasi
                                 </Button>
@@ -140,7 +185,7 @@ export default function AdminInformation({ information }: Props) {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="bg-opacity-20 flex h-12 w-12 items-center justify-center rounded-full bg-white">
-                                            <Info className="h-6 w-6" />
+                                            <Info className="h-6 w-6 text-[#0123AA]" />
                                         </div>
                                         <div>
                                             <h2 className="text-xl font-bold">{currentInformation.title}</h2>
@@ -151,13 +196,13 @@ export default function AdminInformation({ information }: Props) {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => openEditModal(currentInformation)}
-                                            className="bg-opacity-20 hover:bg-opacity-30 flex h-10 w-10 items-center justify-center rounded-full bg-white transition-colors"
+                                            className="hover:cursor-pointer bg-opacity-20 hover:bg-opacity-30 flex h-10 w-10 items-center justify-center rounded-full bg-white transition-colors"
                                         >
-                                            <Edit className="h-5 w-5" />
+                                            <Edit className="h-5 w-5 text-black" />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(currentInformation.id)}
-                                            className="bg-opacity-20 hover:bg-opacity-30 flex h-10 w-10 items-center justify-center rounded-full bg-red-500 transition-colors"
+                                            className="hover:cursor-pointer bg-opacity-20 hover:bg-opacity-30 flex h-10 w-10 items-center justify-center rounded-full bg-red-600 transition-colors"
                                         >
                                             <Trash2 className="h-5 w-5" />
                                         </button>
@@ -208,7 +253,7 @@ export default function AdminInformation({ information }: Props) {
                             <div className="mb-4 text-6xl text-gray-400">📄</div>
                             <h3 className="mb-2 text-xl font-semibold text-gray-600">Belum ada informasi</h3>
                             <p className="mb-6 text-gray-500">Tambahkan informasi perusahaan untuk ditampilkan di halaman about</p>
-                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600">
+                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600 hover:cursor-pointer">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Tambah Informasi
                             </Button>
@@ -235,7 +280,7 @@ export default function AdminInformation({ information }: Props) {
                                 </h2>
                                 <button
                                     onClick={closeModal}
-                                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+                                    className="hover:cursor-pointer flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
@@ -340,17 +385,25 @@ export default function AdminInformation({ information }: Props) {
                                             e.stopPropagation();
                                             closeModal();
                                         }}
-                                        className="flex-1"
+                                        className="flex-1 hover:cursor-pointer"
+                                        disabled={processing || isSubmitting} // Disable during processing
                                     >
                                         Batal
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={processing}
-                                        className="flex-1 bg-[#0123AA] text-white hover:bg-blue-600"
+                                        disabled={processing || isSubmitting} // Use both processing states
+                                        className="hover:cursor-pointer flex-1 bg-[#0123AA] text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        {processing ? 'Menyimpan...' : editingInformation ? 'Update Informasi' : 'Tambah Informasi'}
+                                        {(processing || isSubmitting) ? (
+                                            <div className="flex items-center">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                {editingInformation ? 'Mengupdate...' : 'Menyimpan...'}
+                                            </div>
+                                        ) : (
+                                            editingInformation ? 'Update Informasi' : 'Tambah Informasi'
+                                        )}
                                     </Button>
                                 </div>
                             </form>

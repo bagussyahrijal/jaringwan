@@ -42,6 +42,7 @@ export default function AdminProduct({ products, categories }: Props) {
     const [showModal, setShowModal] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false); // Add custom loading state
 
     const { data, setData, post, put, processing, errors, reset } = useForm({
         name: '',
@@ -51,6 +52,7 @@ export default function AdminProduct({ products, categories }: Props) {
         category_id: '',
         image: null as File | null,
         url_shop: '',
+        _method: 'post', // Add method field
     });
 
     const openCreateModal = () => {
@@ -94,19 +96,69 @@ export default function AdminProduct({ products, categories }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmitting(true); // Set custom loading state
 
-        // ensure method spoofing for update
         if (editingProduct) {
-            setData((prev) => ({ ...prev, _method: 'put' }));
+            // Update existing product
+            const formData = new FormData();
+            formData.append('name', data.name);
+            formData.append('description', data.description);
+            formData.append('price', data.price);
+            formData.append('stock', data.stock);
+            formData.append('category_id', data.category_id);
+            formData.append('url_shop', data.url_shop);
+            formData.append('_method', 'PUT');
 
-            // use Ziggy route helper and Inertia router.post
-            router.post(route('admin.product.update', editingProduct.id), data, {
+            if (data.image) {
+                formData.append('image', data.image);
+            }
+
+            router.post(route('admin.product.update', editingProduct.id), formData, {
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                }
+            });
+        } else {
+            // Create new product - use the form's post method to get automatic processing state
+            post(route('admin.product.store'), {
+                forceFormData: true,
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                }
+            });
+        }
+    };
+
+    // Alternative approach: Use form methods consistently
+    const handleSubmitAlternative = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (editingProduct) {
+            // For updates, we need to set the method
+            setData('_method', 'PUT');
+
+            // Use the form's post method with method spoofing
+            post(route('admin.product.update', editingProduct.id), {
                 forceFormData: true,
                 onSuccess: () => closeModal(),
             });
         } else {
-            // create new product
-            router.post(route('admin.product.store'), data, {
+            // For creates, use the form's post method
+            post(route('admin.product.store'), {
                 forceFormData: true,
                 onSuccess: () => closeModal(),
             });
@@ -140,7 +192,7 @@ export default function AdminProduct({ products, categories }: Props) {
                                 <h1 className="text-2xl font-bold text-gray-900">Kelola Produk</h1>
                                 <p className="text-gray-600">Kelola semua produk jaring Anda</p>
                             </div>
-                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600">
+                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600 hover:cursor-pointer">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Tambah Produk
                             </Button>
@@ -171,13 +223,13 @@ export default function AdminProduct({ products, categories }: Props) {
                                                 onClick={() => openEditModal(product)}
                                                 className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
                                             >
-                                                <Edit className="h-4 w-4 text-[#0123AA]" />
+                                                <Edit className="h-4 w-4 text-[#0123AA] hover:cursor-pointer" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(product.id)}
-                                                className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
+                                                className="bg-opacity-20  hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 transition-colors"
                                             >
-                                                <Trash2 className="h-4 w-4 text-[#0123AA]" />
+                                                <Trash2 className="h-4 w-4 text-white hover:cursor-pointer" />
                                             </button>
                                         </div>
                                     </div>
@@ -240,7 +292,7 @@ export default function AdminProduct({ products, categories }: Props) {
                                 <h2 className="text-2xl font-bold text-gray-900">{editingProduct ? 'Edit Produk' : 'Tambah Produk Baru'}</h2>
                                 <button
                                     onClick={closeModal}
-                                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+                                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200 hover:cursor-pointer"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
@@ -403,17 +455,25 @@ export default function AdminProduct({ products, categories }: Props) {
                                             e.stopPropagation();
                                             closeModal();
                                         }}
-                                        className="flex-1"
+                                        className="flex-1 hover:cursor-pointer"
+                                        disabled={processing || isSubmitting} // Disable during processing
                                     >
                                         Batal
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={processing}
-                                        className="flex-1 bg-[#0123AA] text-white hover:bg-blue-600"
+                                        disabled={processing || isSubmitting} // Use both states
+                                        className="flex-1 bg-[#0123AA] text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        {processing ? 'Menyimpan...' : editingProduct ? 'Update Produk' : 'Tambah Produk'}
+                                        {(processing || isSubmitting) ? (
+                                            <div className="flex items-center">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                {editingProduct ? 'Mengupdate...' : 'Menyimpan...'}
+                                            </div>
+                                        ) : (
+                                            editingProduct ? 'Update Produk' : 'Tambah Produk'
+                                        )}
                                     </Button>
                                 </div>
                             </form>

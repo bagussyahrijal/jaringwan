@@ -29,13 +29,13 @@ export default function AdminOnlineShop({ shops }: Props) {
     const [showModal, setShowModal] = useState(false);
     const [editingShop, setEditingShop] = useState<OnlineShop | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false); // Add custom loading state
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, put, processing, errors, reset } = useForm({
         name: '',
         description: '',
         url: '',
         image: null as File | null,
-        _method: undefined as string | undefined,
     });
 
     const openCreateModal = () => {
@@ -52,7 +52,6 @@ export default function AdminOnlineShop({ shops }: Props) {
             description: shop.description,
             url: shop.url,
             image: null,
-            _method: undefined,
         });
         setPreviewImage(`/storage/${shop.image}`);
         setShowModal(true);
@@ -82,23 +81,85 @@ export default function AdminOnlineShop({ shops }: Props) {
         e.preventDefault();
 
         if (editingShop) {
-            setData((prev) => ({ ...prev, _method: 'put' }));
-
-            router.post(route('admin.online-shop.update', editingShop.id), data, {
+            // Use the form's put method for updates
+            put(route('admin.online-shop.update', editingShop.id), {
                 forceFormData: true,
                 onSuccess: () => closeModal(),
+                onError: (errors) => {
+                    console.log('Update errors:', errors);
+                }
             });
         } else {
-            router.post(route('admin.online-shop.store'), data, {
+            // Use the form's post method for creates
+            post(route('admin.online-shop.store'), {
                 forceFormData: true,
                 onSuccess: () => closeModal(),
+                onError: (errors) => {
+                    console.log('Create errors:', errors);
+                }
+            });
+        }
+    };
+
+    // Alternative approach using router with custom loading state
+    const handleSubmitWithCustomLoading = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        if (editingShop) {
+            const formData = new FormData();
+            formData.append('name', data.name);
+            formData.append('description', data.description);
+            formData.append('url', data.url);
+            formData.append('_method', 'PUT');
+
+            if (data.image) {
+                formData.append('image', data.image);
+            }
+
+            router.post(route('admin.online-shop.update', editingShop.id), formData, {
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                }
+            });
+        } else {
+            const formData = new FormData();
+            formData.append('name', data.name);
+            formData.append('description', data.description);
+            formData.append('url', data.url);
+
+            if (data.image) {
+                formData.append('image', data.image);
+            }
+
+            router.post(route('admin.online-shop.store'), formData, {
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                }
             });
         }
     };
 
     const handleDelete = (id: string) => {
         if (confirm('Apakah Anda yakin ingin menghapus toko online ini?')) {
-            router.delete(route('admin.online-shop.destroy', id));
+            setIsSubmitting(true);
+            router.delete(route('admin.online-shop.destroy', id), {
+                onFinish: () => setIsSubmitting(false)
+            });
         }
     };
 
@@ -123,7 +184,7 @@ export default function AdminOnlineShop({ shops }: Props) {
                                 <h1 className="text-2xl font-bold text-gray-900">Kelola Toko Online</h1>
                                 <p className="text-gray-600">Kelola semua toko online dan marketplace Anda</p>
                             </div>
-                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600">
+                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600 hover:cursor-pointer">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Tambah Toko Online
                             </Button>
@@ -147,7 +208,7 @@ export default function AdminOnlineShop({ shops }: Props) {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className="bg-opacity-20 flex h-10 w-10 items-center justify-center rounded-full bg-white">
-                                                <Store className="h-5 w-5" />
+                                                <Store className="h-5 w-5 text-[#0123AA]" />
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-medium">TOKO ONLINE</h4>
@@ -157,15 +218,15 @@ export default function AdminOnlineShop({ shops }: Props) {
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => openEditModal(shop)}
-                                                className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
+                                                className="hover:cursor-pointer bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
                                             >
                                                 <Edit className="h-4 w-4 text-[#0123AA]" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(shop.id)}
-                                                className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
+                                                className="hover:cursor-pointer bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 transition-colors"
                                             >
-                                                <Trash2 className="h-4 w-4 text-[#0123AA]" />
+                                                <Trash2 className="h-4 w-4 text-white" />
                                             </button>
                                         </div>
                                     </div>
@@ -259,7 +320,7 @@ export default function AdminOnlineShop({ shops }: Props) {
                                 <h2 className="text-2xl font-bold text-gray-900">{editingShop ? 'Edit Toko Online' : 'Tambah Toko Online Baru'}</h2>
                                 <button
                                     onClick={closeModal}
-                                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+                                    className="hover:cursor-pointer flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
@@ -316,7 +377,7 @@ export default function AdminOnlineShop({ shops }: Props) {
                                         type="url"
                                         value={data.url}
                                         onChange={(e) => setData('url', e.target.value)}
-                                        placeholder="https://tokopedia.com/namatoko"
+                                        placeholder="https://onlineshop.com/namatoko"
                                         className="mt-2"
                                         required
                                     />
@@ -350,17 +411,25 @@ export default function AdminOnlineShop({ shops }: Props) {
                                             e.stopPropagation();
                                             closeModal();
                                         }}
-                                        className="flex-1"
+                                        className="flex-1 hover:cursor-pointer"
+                                        disabled={processing || isSubmitting} // Disable during processing
                                     >
                                         Batal
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={processing}
-                                        className="flex-1 bg-[#0123AA] text-white hover:bg-blue-600"
+                                        disabled={processing || isSubmitting} // Use both processing states
+                                        className="hover:cursor-pointer flex-1 bg-[#0123AA] text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        {processing ? 'Menyimpan...' : editingShop ? 'Update Toko' : 'Tambah Toko'}
+                                        {(processing || isSubmitting) ? (
+                                            <div className="flex items-center">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                {editingShop ? 'Mengupdate...' : 'Menyimpan...'}
+                                            </div>
+                                        ) : (
+                                            editingShop ? 'Update Toko' : 'Tambah Toko'
+                                        )}
                                     </Button>
                                 </div>
                             </form>

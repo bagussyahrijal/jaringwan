@@ -15,6 +15,7 @@ interface Product {
     price: number;
     stock: number;
     image: string;
+    url_shop: string;
     category_id: number;
     category: Category;
     created_at: string;
@@ -102,11 +103,10 @@ export default function ProductPage({ products, categories, aboutImage }: Props)
                                         <button
                                             key={category}
                                             onClick={() => setSelectedCategory(category)}
-                                            className={`w-full rounded-lg px-4 py-2 text-left transition-all duration-200 ${
-                                                selectedCategory === category
-                                                    ? 'bg-[#0123AA] text-white shadow-md'
-                                                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                                            }`}
+                                            className={`w-full rounded-lg px-4 py-2 text-left transition-all duration-200 ${selectedCategory === category
+                                                ? 'bg-[#0123AA] text-white shadow-md'
+                                                : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                                                }`}
                                         >
                                             {category}
                                         </button>
@@ -130,21 +130,10 @@ export default function ProductPage({ products, categories, aboutImage }: Props)
                                         transition={{ duration: 0.6, delay: index * 0.1 }}
                                         onHoverStart={() => setHoveredProduct(product.id)}
                                         onHoverEnd={() => setHoveredProduct(null)}
-                                        className="transform overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                                        className="transform overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl"
                                     >
-                                        {/* Product Header */}
-                                        <div className="bg-[#0123AA] p-4 text-white">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h4 className="text-sm font-medium">{product.name}</h4>
-                                                </div>
-                                                <div className="bg-opacity-20 flex h-10 w-10 items-center justify-center rounded-full bg-white">
-                                                    <img src="/assets/images/logo-jaringwan.png" alt="Logo" className="object-contain"></img>
-                                                </div>
-                                            </div>
-                                        </div>
                                         {/* Product Image */}
-                                        <div className="relative h-48 overflow-hidden bg-gray-100">
+                                        <div className="relative h-80 overflow-hidden bg-gray-100">
                                             <img
                                                 src={`/storage/${product.image}`}
                                                 alt={product.name}
@@ -154,10 +143,6 @@ export default function ProductPage({ products, categories, aboutImage }: Props)
                                                         'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZTwvdGV4dD48L3N2Zz4=';
                                                 }}
                                             />
-                                            {/* Premium Badge */}
-                                            <div className="bg-opacity-90 absolute top-4 right-4 rounded-full bg-white px-3 py-1">
-                                                <span className="text-xs font-medium text-blue-600">PREMIUM</span>
-                                            </div>
                                             {/* Quick View Button */}
                                             <motion.button
                                                 initial={{ opacity: 0 }}
@@ -169,18 +154,16 @@ export default function ProductPage({ products, categories, aboutImage }: Props)
                                         </div>
                                         {/* Product Info */}
                                         <div className="p-4">
-                                            <div className="mb-3 rounded-lg bg-[#0123AA] px-4 py-2 text-center text-white">
-                                                <span className="text-sm font-medium">HARTA • TAHTA • SAMUDRA</span>
-                                            </div>
                                             <h3 className="mb-1 font-semibold text-gray-800">{product.name}</h3>
                                             <p className="mb-3 text-sm text-gray-600">{product.category.name}</p>
                                             <p className="mb-3 line-clamp-2 text-xs text-gray-500">{product.description}</p>
                                             <div className="flex items-center justify-between">
                                                 <div className="text-xl font-bold text-blue-600">{formatPrice(product.price)}</div>
                                                 <motion.button
+                                                    onClick={() => window.open(product.url_shop, '_blank')}
                                                     whileHover={{ scale: 1.05 }}
                                                     whileTap={{ scale: 0.95 }}
-                                                    className="rounded-lg bg-[#0123AA] px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600"
+                                                    className="rounded-lg bg-[#0123AA] px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-600 hover:cursor-pointer"
                                                 >
                                                     Beli Sekarang
                                                 </motion.button>

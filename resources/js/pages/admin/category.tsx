@@ -32,8 +32,9 @@ declare const route: any;
 export default function AdminCategory({ categories }: Props) {
     const [showModal, setShowModal] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false); // Add custom loading state
 
-    const { data, setData, post, processing, errors, reset } = useForm<{ name: string; _method?: string }>({
+    const { data, setData, post, put, processing, errors, reset } = useForm<{ name: string }>( {
         name: '',
     });
 
@@ -61,22 +62,67 @@ export default function AdminCategory({ categories }: Props) {
         e.preventDefault();
 
         if (editingCategory) {
-            // method spoofing for Laravel
-            setData((prev) => ({ ...prev, _method: 'put' }));
-
-            router.post(route('admin.category.update', editingCategory.id), data, {
+            // Use the form's put method for updates
+            put(route('admin.category.update', editingCategory.id), {
                 onSuccess: () => closeModal(),
+                onError: (errors) => {
+                    console.log('Update errors:', errors);
+                }
+            });
+        } else {
+            // Use the form's post method for creates
+            post(route('admin.category.store'), {
+                onSuccess: () => closeModal(),
+                onError: (errors) => {
+                    console.log('Create errors:', errors);
+                }
+            });
+        }
+    };
+
+    // Alternative approach using router with custom loading state
+    const handleSubmitWithCustomLoading = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        if (editingCategory) {
+            // method spoofing for Laravel
+            const submitData = { ...data, _method: 'PUT' };
+
+            router.post(route('admin.category.update', editingCategory.id), submitData, {
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                }
             });
         } else {
             router.post(route('admin.category.store'), data, {
-                onSuccess: () => closeModal(),
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                }
             });
         }
     };
 
     const handleDelete = (id: number) => {
         if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-            router.delete(route('admin.category.destroy', id));
+            setIsSubmitting(true);
+            router.delete(route('admin.category.destroy', id), {
+                onFinish: () => setIsSubmitting(false)
+            });
         }
     };
 
@@ -109,7 +155,7 @@ export default function AdminCategory({ categories }: Props) {
                                 <h1 className="text-2xl font-bold text-gray-900">Kelola Kategori</h1>
                                 <p className="text-gray-600">Kelola semua kategori produk Anda</p>
                             </div>
-                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600">
+                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600 hover:cursor-pointer">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Tambah Kategori
                             </Button>
@@ -133,7 +179,7 @@ export default function AdminCategory({ categories }: Props) {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className="bg-opacity-20 flex h-10 w-10 items-center justify-center rounded-full bg-white">
-                                                <FolderOpen className="h-5 w-5" />
+                                                <FolderOpen className="h-5 w-5 text-[#0123AA]" />
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-medium">KATEGORI</h4>
@@ -143,15 +189,15 @@ export default function AdminCategory({ categories }: Props) {
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => openEditModal(category)}
-                                                className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
+                                                className="bg-opacity-20 hover:cursor-pointer hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
                                             >
                                                 <Edit className="h-4 w-4 text-[#0123AA]" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(category.id)}
-                                                className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
+                                                className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 hover:cursor-pointer transition-colors"
                                             >
-                                                <Trash2 className="h-4 w-4 text-[#0123AA]" />
+                                                <Trash2 className="h-4 w-4 text-white" />
                                             </button>
                                         </div>
                                     </div>
@@ -254,7 +300,7 @@ export default function AdminCategory({ categories }: Props) {
                                 <h2 className="text-2xl font-bold text-gray-900">{editingCategory ? 'Edit Kategori' : 'Tambah Kategori Baru'}</h2>
                                 <button
                                     onClick={closeModal}
-                                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
+                                    className="hover:cursor-pointer flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
                                 >
                                     <X className="h-5 w-5" />
                                 </button>
@@ -305,17 +351,25 @@ export default function AdminCategory({ categories }: Props) {
                                             e.stopPropagation();
                                             closeModal();
                                         }}
-                                        className="flex-1"
+                                        className="flex-1 hover:cursor-pointer"
+                                        disabled={processing || isSubmitting} // Disable during processing
                                     >
                                         Batal
                                     </Button>
                                     <Button
                                         type="submit"
-                                        disabled={processing}
-                                        className="flex-1 bg-[#0123AA] text-white hover:bg-blue-600"
+                                        disabled={processing || isSubmitting} // Use both processing states
+                                        className="hover:cursor-pointer flex-1 bg-[#0123AA] text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        {processing ? 'Menyimpan...' : editingCategory ? 'Update Kategori' : 'Tambah Kategori'}
+                                        {(processing || isSubmitting) ? (
+                                            <div className="flex items-center">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                {editingCategory ? 'Mengupdate...' : 'Menyimpan...'}
+                                            </div>
+                                        ) : (
+                                            editingCategory ? 'Update Kategori' : 'Tambah Kategori'
+                                        )}
                                     </Button>
                                 </div>
                             </form>

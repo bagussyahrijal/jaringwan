@@ -192,7 +192,7 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                             onClick={() => openModal(item)}
                                         >
                                             {/* Item Image */}
-                                            <div className="relative h-48 overflow-hidden bg-gray-100">
+                                            <div className="relative h-80 overflow-hidden bg-gray-100">
                                                 <img
                                                     src={
                                                         item.mediaUrl ||
