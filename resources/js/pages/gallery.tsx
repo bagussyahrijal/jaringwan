@@ -41,6 +41,8 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
     const [selectedCategory, setSelectedCategory] = useState('Semua');
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+    const [showAll, setShowAll] = useState(false); // Add state for showing all items
+    const [itemsToShow, setItemsToShow] = useState(6); // Track number of items to show
 
     const categories = ['Semua', 'Foto', 'Video'];
 
@@ -61,12 +63,31 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
         return categoryMatch;
     });
 
+    // Get items to display based on showAll state
+    const displayedItems = showAll ? filteredItems : filteredItems.slice(0, itemsToShow);
+
     const openModal = (item: GalleryItem) => {
         setSelectedItem(item);
     };
 
     const closeModal = () => {
         setSelectedItem(null);
+    };
+
+    const handleLoadMore = () => {
+        setShowAll(true);
+    };
+
+    const handleShowLess = () => {
+        setShowAll(false);
+        setItemsToShow(6);
+    };
+
+    // Reset showAll when category changes
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+        setShowAll(false);
+        setItemsToShow(6);
     };
 
     return (
@@ -129,7 +150,7 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                         {categories.map((category) => (
                                             <button
                                                 key={category}
-                                                onClick={() => setSelectedCategory(category)}
+                                                onClick={() => handleCategoryChange(category)}
                                                 className={`flex w-full items-center rounded-lg px-4 py-2 text-left transition-all duration-200 ${
                                                     selectedCategory === category
                                                         ? 'bg-[#0123AA] text-white shadow-md'
@@ -168,6 +189,16 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                         ))}
                                     </div>
                                 </div>
+
+                                {/* Gallery Stats */}
+                                <div className="mt-6 pt-6 border-t border-gray-200">
+                                    <div className="text-sm text-gray-600">
+                                        <div className="flex justify-between mb-2">
+                                            <span>Total Items:</span>
+                                            <span className="font-semibold">{filteredItems.length}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
 
@@ -179,8 +210,8 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                 transition={{ duration: 0.6, delay: 0.2 }}
                                 className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
                             >
-                                {filteredItems.length > 0 ? (
-                                    filteredItems.map((item, index) => (
+                                {displayedItems.length > 0 ? (
+                                    displayedItems.map((item, index) => (
                                         <motion.div
                                             key={item.id}
                                             initial={{ opacity: 0, y: 30 }}
@@ -196,13 +227,13 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                                 <img
                                                     src={
                                                         item.mediaUrl ||
-                                                        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZTwvdGV4dD48L3N2Zz4='
+                                                        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZTwvdGV4dD48L3N2Zz4='
                                                     }
                                                     alt={item.title}
                                                     className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
                                                     onError={(e) => {
                                                         e.currentTarget.src =
-                                                            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZTwvdGV4dD48L3N2Zz4=';
+                                                            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZTwvdGV4dD48L3N2Zz4=';
                                                     }}
                                                 />
 
@@ -293,17 +324,29 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                 )}
                             </motion.div>
 
-                            {/* Load More Button */}
-                            {filteredItems.length >= 6 && (
+                            {/* Load More / Show Less Button */}
+                            {filteredItems.length > 6 && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ duration: 0.6, delay: 0.8 }}
                                     className="mt-12 text-center"
                                 >
-                                    <button className="transform rounded-lg bg-[#0123AA] px-8 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-blue-700">
-                                        Muat Lebih Banyak Media
-                                    </button>
+                                    {!showAll ? (
+                                        <button
+                                            onClick={handleLoadMore}
+                                            className="transform rounded-lg bg-[#0123AA] px-8 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-blue-700"
+                                        >
+                                            Muat Lebih Banyak Media
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={handleShowLess}
+                                            className="transform rounded-lg bg-gray-600 px-8 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-700"
+                                        >
+                                            Tampilkan Lebih Sedikit
+                                        </button>
+                                    )}
                                 </motion.div>
                             )}
                         </div>
@@ -348,7 +391,7 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                             className="h-full w-full rounded-lg object-cover"
                                             onError={(e) => {
                                                 e.currentTarget.src =
-                                                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZTwvdGV4dD48L3N2Zz4=';
+                                                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZTwvdGV4dD48L3N2Zz4=';
                                             }}
                                         />
                                     ) : (
