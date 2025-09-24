@@ -33,8 +33,8 @@
         <title inertia>{{ config('app.name') }}</title>
 
         <link rel="icon" href="/assets/images/logo-jaringwan.png" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
+        <link rel="apple-touch-icon" href="/assets/images/logo-jaringwan.png" type="image/svg+xml">
+        <link rel="mask-icon" href="/assets/images/logo-jaringwan.png" color="#000000">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
