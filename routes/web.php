@@ -10,7 +10,9 @@ use App\Http\Controllers\Product\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', [ImageTabController::class, 'homeIndex'])->name('home');
+Route::get('/', function () {
+    return redirect('/dashboard');
+});
 
 Route::get('dashboard', [ImageTabController::class, 'dashboardIndex'])->name('dashboard');
 
@@ -25,7 +27,7 @@ Route::get('contact', function () {
 })->name('contact');
 Route::middleware(['auth', 'verified'])->group(function () {});
 
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(function() {
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->group(function () {
     Route::redirect('/', '/admin/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 

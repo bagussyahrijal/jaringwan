@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Gallery;
 
 class ImageTabController extends Controller
 {
@@ -29,21 +30,27 @@ class ImageTabController extends Controller
     public function homeIndex()
     {
         $homeImage = ImageTab::where('category', 'Home and About')->first();
-        return Inertia::render('welcome', [
+        return Inertia::render('dashboard', [
             'homeImage' => $homeImage,
         ]);
     }
 
     public function dashboardIndex()
     {
+         $gallery = Gallery::with('galleryItems')
+                     ->whereNotNull('video')
+                     ->where('video', '!=', '')
+                     ->latest()
+                     ->get();
         $products = Product::with('category')->latest()->get();
         $categories = Category::all();
-        $aboutImage = ImageTab::where('category', 'Product and Gallery')->first();
+        $homeImage = ImageTab::where('category', 'Home and About')->first();
 
         return Inertia::render('dashboard', [
+            'homeImage' => $homeImage,
             'products' => $products,
             'categories' => $categories,
-            'aboutImage' => $aboutImage,
+            'gallery' => $gallery,
         ]);
     }
 

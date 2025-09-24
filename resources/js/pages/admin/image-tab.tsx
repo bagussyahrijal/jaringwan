@@ -1,3 +1,4 @@
+import AdminLayout from '@/layouts/admin-layout';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
@@ -121,7 +122,6 @@ export default function ImageTabPage({ imageTabs }: Props) {
 
         e.preventDefault();
         setErrors({});
-
         const data = new FormData();
         data.append('category', formData.category);
         if (formData.image) {
@@ -150,7 +150,7 @@ export default function ImageTabPage({ imageTabs }: Props) {
     };
 
     return (
-        <AppLayout>
+        <AdminLayout>
             <Head title="Manajemen Image Tab" />
 
             <div className="min-h-screen bg-gray-50">
@@ -167,9 +167,8 @@ export default function ImageTabPage({ imageTabs }: Props) {
                         <button
                             onClick={openCreateModal}
                             disabled={isAllCategoriesTaken}
-                            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors ${
-                                isAllCategoriesTaken ? 'cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
+                            className={`hover:cursor-pointer flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors ${isAllCategoriesTaken ? 'cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+                                }`}
                             title={isAllCategoriesTaken ? 'Semua kategori sudah ada' : 'Tambah Image Tab'}
                         >
                             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -281,7 +280,7 @@ export default function ImageTabPage({ imageTabs }: Props) {
                                                             e.stopPropagation();
                                                             openEditModal(item);
                                                         }}
-                                                        className="flex-1 rounded-md bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-200"
+                                                        className="hover:cursor-pointer flex-1 rounded-md bg-yellow-100 px-3 py-2 text-sm font-medium text-yellow-800 transition-colors hover:bg-yellow-200"
                                                     >
                                                         Edit
                                                     </button>
@@ -290,7 +289,7 @@ export default function ImageTabPage({ imageTabs }: Props) {
                                                             e.stopPropagation();
                                                             openDeleteModal(item);
                                                         }}
-                                                        className="flex-1 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-800 transition-colors hover:bg-red-200"
+                                                        className="hover:cursor-pointer flex-1 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-800 transition-colors hover:bg-red-200"
                                                     >
                                                         Hapus
                                                     </button>
@@ -436,13 +435,13 @@ export default function ImageTabPage({ imageTabs }: Props) {
                                     <button
                                         type="button"
                                         onClick={closeCreateModal}
-                                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                        className="hover:cursor-pointer rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                        className="hover:cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                                     >
                                         Simpan
                                     </button>
@@ -470,24 +469,6 @@ export default function ImageTabPage({ imageTabs }: Props) {
                         >
                             <h3 className="mb-4 text-lg font-semibold">Edit Image Tab</h3>
                             <form onSubmit={handleUpdate}>
-                                <div className="mb-4">
-                                    <label className="mb-2 block text-sm font-medium text-gray-700">Kategori</label>
-                                    <select
-                                        name="category"
-                                        value={formData.category}
-                                        onChange={handleInputChange}
-                                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                        required
-                                    >
-                                        <option value="">Pilih Kategori</option>
-                                        {categories.map((category) => (
-                                            <option key={category} value={category}>
-                                                {category}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
-                                </div>
 
                                 <div className="mb-4">
                                     <label className="mb-2 block text-sm font-medium text-gray-700">Gambar Saat Ini</label>
@@ -513,13 +494,13 @@ export default function ImageTabPage({ imageTabs }: Props) {
                                     <button
                                         type="button"
                                         onClick={closeEditModal}
-                                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                        className="hover:cursor-pointer rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                                     >
                                         Batal
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                        className="hover:cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                                     >
                                         Update
                                     </button>
@@ -567,6 +548,6 @@ export default function ImageTabPage({ imageTabs }: Props) {
                     </motion.div>
                 )}
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

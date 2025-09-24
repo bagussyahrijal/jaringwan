@@ -42,6 +42,11 @@ const mainNavItems: NavItem[] = [
         href: '/admin/information',
         icon: BookOpen,
     },
+    {
+        title: 'Background',
+        href: '/admin/image-tab',
+        icon: SunMoon,
+    }
     // {
     //     title: 'Kontak',
     //     href: '/admin/contact',

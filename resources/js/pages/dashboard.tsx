@@ -6,7 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowRight, Mail, MapPin, Phone, Play, ShoppingBag, Star, Users } from 'lucide-react';
+import { ArrowRight, Mail, MapPin, Phone, Play, ShoppingBag, Star, Users, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface ImageTab {
@@ -15,6 +15,19 @@ interface ImageTab {
     image: string;
     created_at: string;
     updated_at: string;
+}
+
+interface GalleryItem {
+    id: string;
+    title: string;
+    image: string | null;
+    video: string | null;
+    description: string;
+    created_at: string;
+    updated_at: string;
+    type?: 'foto' | 'video';
+    mediaUrl?: string;
+    tags?: string[];
 }
 
 interface Product {
@@ -43,7 +56,7 @@ interface Props {
     homeImage?: ImageTab;
     products: Product[];
     categories: Category[];
-
+    gallery: GalleryItem[]; // Add gallery to props
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -58,24 +71,29 @@ const ecommercePartners = [
         name: 'Shopee',
         logo: '/assets/images/platforms/shopee.png',
         color: 'bg-orange-500',
-        url: 'https://shopee.co.id',
+        url: 'https://shopee.co.id/jaring_wan?entryPoint=ShopBySearch&searchKeyword=jaringwan',
     },
     {
         name: 'TikTok',
         logo: '/assets/images/platforms/tiktok.png',
         color: 'bg-black',
-        url: 'https://tiktok.com',
+        url: 'https://vt.tiktok.com/ZSDusyhfE/?page=Mall',
     },
     {
         name: 'Tokopedia',
         logo: '/assets/images/platforms/tokopedia.png',
         color: 'bg-green-500',
-        url: 'https://tokopedia.com',
+        url: 'https://www.tokopedia.com/jaringwan',
     },
 ];
 
-export default function Dashboard({ homeImage, products, categories }: Props) {
+export default function Dashboard({ homeImage, products, categories, gallery }: Props) {
     const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+    const [selectedVideo, setSelectedVideo] = useState<GalleryItem | null>(null);
+
+    // Get featured video from gallery (first video with content)
+    const featuredVideo = gallery?.find(item => item.video && item.video.trim() !== '') || null;
 
     // Format price helper function
     const formatPrice = (price: number) => {
@@ -84,6 +102,24 @@ export default function Dashboard({ homeImage, products, categories }: Props) {
             currency: 'IDR',
             minimumFractionDigits: 0,
         }).format(price);
+    };
+
+    // Helper function to get proper image/video URL
+    const getMediaUrl = (mediaPath: string) => {
+        if (!mediaPath) return undefined;
+        if (mediaPath.startsWith('/storage/')) return mediaPath;
+        if (mediaPath.startsWith('http')) return mediaPath;
+        return `/storage/${mediaPath}`;
+    };
+
+    const openVideoModal = (video: GalleryItem) => {
+        setSelectedVideo(video);
+        setIsVideoModalOpen(true);
+    };
+
+    const closeVideoModal = () => {
+        setSelectedVideo(null);
+        setIsVideoModalOpen(false);
     };
 
     // Helper function to get proper image URL
@@ -260,24 +296,117 @@ export default function Dashboard({ homeImage, products, categories }: Props) {
                     </div>
 
                     <div className="relative mx-auto max-w-4xl">
-                        <div className="group relative aspect-video cursor-pointer overflow-hidden rounded-xl bg-gradient-to-br from-gray-800 to-gray-700">
-                            <PlaceholderPattern className="h-full w-full stroke-gray-600/30" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover:scale-110">
-                                    <Play className="ml-1 h-8 w-8 text-white" fill="currentColor" />
+                        {featuredVideo ? (
+                            <div
+                                className="group relative aspect-video cursor-pointer overflow-hidden rounded-xl bg-gradient-to-br from-gray-800 to-gray-700"
+                                onClick={() => openVideoModal(featuredVideo)}
+                            >
+                                {/* Video Thumbnail */}
+                                <video
+                                    src={getMediaUrl(featuredVideo.video!)}
+                                    className="h-full w-full object-cover"
+                                    muted
+                                    preload="metadata"
+                                />
+
+                                {/* Play Button Overlay */}
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover:scale-110">
+                                        <Play className="ml-1 h-8 w-8 text-white" fill="currentColor" />
+                                    </div>
                                 </div>
+
+                                {/* Hover effect */}
+                                <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/10" />
+
+                                {/* Video Title */}
+                                {featuredVideo.title && (
+                                    <div className="absolute bottom-4 left-4 right-4">
+                                        <h3 className="text-lg font-semibold text-white mb-1">{featuredVideo.title}</h3>
+                                        {featuredVideo.description && (
+                                            <p className="text-sm text-gray-300 line-clamp-2">{featuredVideo.description}</p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                            <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/10" />
-                        </div>
+                        ) : (
+                            <div className="group relative aspect-video cursor-pointer overflow-hidden rounded-xl bg-gradient-to-br from-gray-800 to-gray-700">
+                                <PlaceholderPattern className="h-full w-full stroke-gray-600/30" />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 transition-transform duration-300 group-hover:scale-110 mx-auto mb-4">
+                                            <Play className="ml-1 h-8 w-8 text-white" fill="currentColor" />
+                                        </div>
+                                        <p className="text-white/80 text-sm">Video akan segera hadir</p>
+                                    </div>
+                                </div>
+                                <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/10" />
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-8 text-center">
-                        <Button size="lg" className="rounded-full bg-blue-600 px-8 py-3 font-semibold hover:bg-blue-700">
-                            Tonton Video
-                        </Button>
+                        {featuredVideo ? (
+                            <Button
+                                size="lg"
+                                className=" rounded-full bg-blue-600 px-8 py-3 font-semibold hover:bg-blue-700"
+                                onClick={() => openVideoModal(featuredVideo)}
+                            >
+                                Tonton Video
+                            </Button>
+                        ) : (
+                            <Button
+                                size="lg"
+                                className=" hover:cursor-pointer rounded-full bg-blue-600 px-8 py-3 font-semibold hover:bg-blue-700"
+                                onClick={() => { window.location.href = '/gallery'; }}
+                            >
+                                Lihat Galeri
+                            </Button>
+                        )}
                     </div>
                 </div>
             </section>
+
+            {/* Video Modal */}
+            {isVideoModalOpen && selectedVideo && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+                    onClick={closeVideoModal}
+                >
+                    <div
+                        className="relative max-w-4xl w-full max-h-[90vh] bg-black rounded-lg overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close button */}
+                        <button
+                            onClick={closeVideoModal}
+                            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
+
+                        {/* Video Player */}
+                        <video
+                            src={getMediaUrl(selectedVideo.video!)}
+                            controls
+                            autoPlay
+                            className="w-full h-auto max-h-[80vh]"
+                        />
+
+                        {/* Video Info */}
+                        {(selectedVideo.title || selectedVideo.description) && (
+                            <div className="p-6 bg-gray-900 text-white">
+                                {selectedVideo.title && (
+                                    <h3 className="text-xl font-bold mb-2">{selectedVideo.title}</h3>
+                                )}
+                                {selectedVideo.description && (
+                                    <p className="text-gray-300">{selectedVideo.description}</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* E-commerce Partners */}
             <section className="bg-white py-16">
@@ -291,11 +420,17 @@ export default function Dashboard({ homeImage, products, categories }: Props) {
 
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         {ecommercePartners.map((partner, index) => (
-                            <Link key={index} href={partner.url} target="_blank" className="group">
+                            <a
+                                key={index}
+                                href={partner.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group"
+                            >
                                 <Card className="h-48 transform cursor-pointer overflow-hidden border-0 transition-all duration-300 hover:scale-105 hover:shadow-xl bg-gray-900">
-                                    <CardContent className={` relative flex h-full items-center justify-center p-8`}>
+                                    <CardContent className="relative flex h-full items-center justify-center p-8">
                                         <div className="text-center">
-                                            <div className={`${partner.color} mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl `}>
+                                            <div className={`${partner.color} mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl`}>
                                                 <img src={partner.logo} alt={partner.name} className="h-10 w-10 object-contain" />
                                             </div>
                                             <h3 className="text-xl font-bold text-white">{partner.name}</h3>
@@ -307,7 +442,7 @@ export default function Dashboard({ homeImage, products, categories }: Props) {
                                         </div>
                                     </CardContent>
                                 </Card>
-                            </Link>
+                            </a>
                         ))}
                     </div>
                 </div>
@@ -321,7 +456,7 @@ export default function Dashboard({ homeImage, products, categories }: Props) {
                         Hubungi kami sekarang untuk konsultasi gratis dan dapatkan penawaran terbaik untuk kebutuhan jaring ikan Anda.
                     </p>
                     <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                        <Button size="lg" className="rounded-full bg-white px-8 py-3 font-semibold text-blue-600 hover:bg-gray-100 hover:cursor-pointer" onClick={() => { window.location.href = '/contact'}}>
+                        <Button size="lg" className="rounded-full bg-white px-8 py-3 font-semibold text-blue-600 hover:bg-gray-100 hover:cursor-pointer" onClick={() => { window.location.href = '/contact' }}>
                             <Phone className="mr-2 h-5 w-5" />
                             Hubungi Kami
                         </Button>
