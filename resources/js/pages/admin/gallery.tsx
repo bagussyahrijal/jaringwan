@@ -398,7 +398,7 @@ export default function AdminGallery({ galleries }: Props) {
                                 <div className="relative aspect-video">
                                     {gallery.image ? (
                                         <img
-                                            src={gallery.image_url ? gallery.image_url : `/storage/${gallery.image}`}
+                                            src={gallery.image_url ? gallery.image_url : `public/storage/${gallery.image}`}
                                             alt={gallery.title}
                                             className="h-full w-full object-cover"
                                             onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
