@@ -19,6 +19,7 @@ interface Gallery {
     id: string;
     title: string;
     image: string;
+    image_url: string | null;
     video: string;
     description: string;
     created_at: string;
@@ -330,6 +331,8 @@ export default function AdminGallery({ galleries }: Props) {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
+    console.log('Galleries:', galleries);
+
     return (
         <AdminLayout>
             <Head title="Kelola Galeri" />
@@ -395,7 +398,7 @@ export default function AdminGallery({ galleries }: Props) {
                                 <div className="relative aspect-video">
                                     {gallery.image ? (
                                         <img
-                                            src={`/storage/${gallery.image}`}
+                                            src={gallery.image_url ? gallery.image_url : `/storage/${gallery.image}`}
                                             alt={gallery.title}
                                             className="h-full w-full object-cover"
                                             onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
