@@ -36,8 +36,9 @@ class GalleryController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'image' => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
-            'video' => 'nullable|file|mimes:mp4,mov|max:10240',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif|max:2048',
+            'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:10240',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:2048|required_with:video',
             'description' => 'required|string|max:1000',
             'gallery_items' => 'present|array',
             'gallery_items.*.tag' => 'required|string|max:255',
@@ -51,6 +52,7 @@ class GalleryController extends Controller
         DB::transaction(function () use ($request, $validated, &$gallery) {
             $imagePath = null;
             $videoPath = null;
+            $thumbPath = null;
 
             if ($request->hasFile('image')) {
                 $imagePath = $request->file('image')->store('galleries/images', 'public');
@@ -58,12 +60,16 @@ class GalleryController extends Controller
 
             if ($request->hasFile('video')) {
                 $videoPath = $request->file('video')->store('galleries/videos', 'public');
+                if ($request->hasFile('thumbnail')) {
+                    $thumbPath = $request->file('thumbnail')->store('galleries/thumbnails', 'public');
+                }
             }
 
             $gallery = Gallery::create([
                 'title' => $validated['title'],
                 'image' => $imagePath,
                 'video' => $videoPath,
+                'thumbnail' => $thumbPath,
                 'description' => $validated['description'],
             ]);
 
@@ -83,8 +89,9 @@ class GalleryController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'image' => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
-            'video' => 'nullable|file|mimes:mp4,mov|max:10240',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif|max:2048',
+            'video' => 'nullable|file|mimes:mp4,mov,avi,wmv|max:10240',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048', // required_with handled only when uploading new video
             'description' => 'required|string|max:1000',
             'gallery_items' => 'present|array',
             'gallery_items.*.tag' => 'required|string|max:255',
@@ -98,14 +105,18 @@ class GalleryController extends Controller
                 if ($gallery->image && Storage::disk('public')->exists($gallery->image)) {
                     Storage::disk('public')->delete($gallery->image);
                 }
-                // Delete old video if exists (switching from video to image)
+                // Delete old video and thumbnail if exists (switching from video to image)
                 if ($gallery->video && Storage::disk('public')->exists($gallery->video)) {
                     Storage::disk('public')->delete($gallery->video);
+                }
+                if ($gallery->thumbnail && Storage::disk('public')->exists($gallery->thumbnail)) {
+                    Storage::disk('public')->delete($gallery->thumbnail);
                 }
 
                 $imagePath = $request->file('image')->store('galleries/images', 'public');
                 $gallery->image = $imagePath;
                 $gallery->video = null; // Clear video when image is uploaded
+                $gallery->thumbnail = null; // Clear thumbnail as well
             }
 
             if ($request->hasFile('video')) {
@@ -121,6 +132,25 @@ class GalleryController extends Controller
                 $videoPath = $request->file('video')->store('galleries/videos', 'public');
                 $gallery->video = $videoPath;
                 $gallery->image = null; // Clear image when video is uploaded
+
+                // If new thumbnail provided, replace old thumbnail
+                if ($request->hasFile('thumbnail')) {
+                    if ($gallery->thumbnail && Storage::disk('public')->exists($gallery->thumbnail)) {
+                        Storage::disk('public')->delete($gallery->thumbnail);
+                    }
+                    $thumbPath = $request->file('thumbnail')->store('galleries/thumbnails', 'public');
+                    $gallery->thumbnail = $thumbPath;
+                } elseif (!$gallery->thumbnail) {
+                    // Ensure thumbnail presence when video is uploaded newly
+                    // Not forcing here; validation can be adjusted if needed
+                }
+            } else if ($request->hasFile('thumbnail')) {
+                // Allow updating thumbnail without changing video
+                if ($gallery->thumbnail && Storage::disk('public')->exists($gallery->thumbnail)) {
+                    Storage::disk('public')->delete($gallery->thumbnail);
+                }
+                $thumbPath = $request->file('thumbnail')->store('galleries/thumbnails', 'public');
+                $gallery->thumbnail = $thumbPath;
             }
 
             $gallery->title = $validated['title'];
@@ -173,6 +203,10 @@ class GalleryController extends Controller
 
             if ($gallery->video && Storage::disk('public')->exists($gallery->video)) {
                 Storage::disk('public')->delete($gallery->video);
+            }
+
+            if ($gallery->thumbnail && Storage::disk('public')->exists($gallery->thumbnail)) {
+                Storage::disk('public')->delete($gallery->thumbnail);
             }
 
             $gallery->delete();

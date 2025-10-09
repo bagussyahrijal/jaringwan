@@ -3,7 +3,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AdminLayout from '@/layouts/admin-layout';
-import AppLayout from '@/layouts/app-layout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Edit, Image, Plus, Tag, Trash2, X } from 'lucide-react';
@@ -25,6 +24,8 @@ interface Gallery {
     created_at: string;
     updated_at: string;
     gallery_items: GalleryItem[];
+    thumbnail?: string | null;
+    thumbnail_url?: string | null;
 }
 
 interface Props {
@@ -33,21 +34,34 @@ interface Props {
 
 declare const route: any;
 
+type GalleryFormValues = {
+    title: string;
+    description: string;
+    image: File | null;
+    video: File | null;
+    thumbnail: File | null;
+    gallery_items: { id?: string; tag: string }[];
+    _method?: string;
+};
+
 export default function AdminGallery({ galleries }: Props) {
     const [showModal, setShowModal] = useState(false);
     const [editingGallery, setEditingGallery] = useState<Gallery | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+    const [previewThumb, setPreviewThumb] = useState<string | null>(null);
     const [galleryItems, setGalleryItems] = useState<{ id?: string; tag: string }[]>([{ tag: '' }]);
     const [isSubmitting, setIsSubmitting] = useState(false); // Add custom loading state
     const [uploadError, setUploadError] = useState<string | null>(null);
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, put, processing, errors, reset } = useForm<GalleryFormValues>({
         title: '',
         description: '',
-        image: null as File | null,
-        video: null as File | null,
+        image: null,
+        video: null,
+        thumbnail: null,
         gallery_items: [{ tag: '' }],
+        _method: undefined,
     });
 
     const openCreateModal = () => {
@@ -55,6 +69,7 @@ export default function AdminGallery({ galleries }: Props) {
         setEditingGallery(null);
         setPreviewImage(null);
         setPreviewVideo(null);
+        setPreviewThumb(null);
         setGalleryItems([{ tag: '' }]);
         setData('gallery_items', [{ tag: '' }]);
         setShowModal(true);
@@ -69,11 +84,13 @@ export default function AdminGallery({ galleries }: Props) {
             description: gallery.description,
             image: null,
             video: null,
+            thumbnail: null,
             gallery_items: items,
         });
         // Only set preview URLs when media exists to avoid /storage/null requests
         setPreviewImage(gallery.image ? `/storage/${gallery.image}` : null);
         setPreviewVideo(gallery.video ? `/storage/${gallery.video}` : null);
+        setPreviewThumb(gallery.thumbnail ? `/storage/${gallery.thumbnail}` : (gallery.thumbnail_url ?? null));
         setShowModal(true);
     };
 
@@ -82,6 +99,7 @@ export default function AdminGallery({ galleries }: Props) {
         setEditingGallery(null);
         setPreviewImage(null);
         setPreviewVideo(null);
+        setPreviewThumb(null);
         setGalleryItems([{ tag: '' }]);
         setUploadError(null); // Reset upload error
         reset();
@@ -112,10 +130,7 @@ export default function AdminGallery({ galleries }: Props) {
             setData('image', file);
             setData('video', null); // Clear video when image is selected
             setPreviewVideo(null);
-
-            const reader = new FileReader();
-            reader.onload = () => setPreviewImage(reader.result as string);
-            reader.readAsDataURL(file);
+            setPreviewThumb(null);
         } else {
             setData('image', null);
             setPreviewImage(null);
@@ -147,14 +162,42 @@ export default function AdminGallery({ galleries }: Props) {
             setData('video', file);
             setData('image', null); // Clear image when video is selected
             setPreviewImage(null);
-
-            // Create video preview
+            // Ask for thumbnail
+            if (!previewThumb) {
+                setUploadError('Silakan upload thumbnail untuk video (maks 2MB, JPG/PNG/WEBP).');
+            }
             const reader = new FileReader();
             reader.onload = () => setPreviewVideo(reader.result as string);
             reader.readAsDataURL(file);
         } else {
             setData('video', null);
             setPreviewVideo(null);
+        }
+    };
+
+    const handleThumbChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        setUploadError(null);
+        if (file) {
+            const maxSize = 2 * 1024 * 1024;
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+            if (file.size > maxSize) {
+                setUploadError(`Ukuran thumbnail terlalu besar. Maksimal 2MB, ukuran file Anda: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+                e.target.value = '';
+                return;
+            }
+            if (!allowedTypes.includes(file.type)) {
+                setUploadError('Format thumbnail tidak didukung. Gunakan JPEG, PNG, GIF, atau WebP.');
+                e.target.value = '';
+                return;
+            }
+            setData('thumbnail', file);
+            const reader = new FileReader();
+            reader.onload = () => setPreviewThumb(reader.result as string);
+            reader.readAsDataURL(file);
+        } else {
+            setData('thumbnail', null);
+            setPreviewThumb(null);
         }
     };
 
@@ -183,55 +226,30 @@ export default function AdminGallery({ galleries }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Reset upload error
-        setUploadError(null);
-
         // Client-side validation: ensure at least one file is selected for new galleries
         if (!editingGallery && !data.image && !data.video) {
-            setUploadError('Anda harus mengupload setidaknya satu file (gambar atau video).');
+            alert('Anda harus mengupload setidaknya satu file (gambar atau video).');
             return;
         }
 
-        // Additional file size check before submission
-        if (data.video && data.video.size > 10 * 1024 * 1024) {
-            setUploadError(`Video terlalu besar (${(data.video.size / (1024 * 1024)).toFixed(2)}MB). Maksimal 10MB.`);
-            return;
-        }
-
-        if (data.image && data.image.size > 2 * 1024 * 1024) {
-            setUploadError(`Gambar terlalu besar (${(data.image.size / (1024 * 1024)).toFixed(2)}MB). Maksimal 2MB.`);
+        // If a new video is selected, require a thumbnail on client side as well
+        if (data.video && !data.thumbnail) {
+            alert('Silakan upload thumbnail untuk video yang diunggah.');
             return;
         }
 
         if (editingGallery) {
-            // Use the form's put method for updates
-            put(route('admin.gallery.update', editingGallery.id), {
+            setData('_method', 'put');
+
+            // Use POST with _method for update (not PUT)
+            router.post(route('admin.gallery.update', editingGallery.id), data, {
                 forceFormData: true,
                 onSuccess: () => closeModal(),
-                onError: (errors) => {
-                    console.log('Update errors:', errors);
-                    if (errors.video) {
-                        setUploadError(errors.video);
-                    }
-                    if (errors.image) {
-                        setUploadError(errors.image);
-                    }
-                }
             });
         } else {
-            // Use the form's post method for creates
-            post(route('admin.gallery.store'), {
+            router.post(route('admin.gallery.store'), data, {
                 forceFormData: true,
                 onSuccess: () => closeModal(),
-                onError: (errors) => {
-                    console.log('Create errors:', errors);
-                    if (errors.video) {
-                        setUploadError(errors.video);
-                    }
-                    if (errors.image) {
-                        setUploadError(errors.image);
-                    }
-                }
             });
         }
     };
@@ -256,6 +274,7 @@ export default function AdminGallery({ galleries }: Props) {
 
             if (data.image) formData.append('image', data.image);
             if (data.video) formData.append('video', data.video);
+            if (data.thumbnail) formData.append('thumbnail', data.thumbnail);
 
             // Add gallery items
             data.gallery_items.forEach((item, index) => {
@@ -275,7 +294,7 @@ export default function AdminGallery({ galleries }: Props) {
                 },
                 onFinish: () => {
                     setIsSubmitting(false);
-                }
+                },
             });
         } else {
             const formData = new FormData();
@@ -284,6 +303,7 @@ export default function AdminGallery({ galleries }: Props) {
 
             if (data.image) formData.append('image', data.image);
             if (data.video) formData.append('video', data.video);
+            if (data.thumbnail) formData.append('thumbnail', data.thumbnail);
 
             // Add gallery items
             data.gallery_items.forEach((item, index) => {
@@ -300,7 +320,7 @@ export default function AdminGallery({ galleries }: Props) {
                 },
                 onFinish: () => {
                     setIsSubmitting(false);
-                }
+                },
             });
         }
     };
@@ -309,7 +329,7 @@ export default function AdminGallery({ galleries }: Props) {
         if (confirm('Apakah Anda yakin ingin menghapus galeri ini?')) {
             setIsSubmitting(true);
             router.delete(route('admin.gallery.destroy', id), {
-                onFinish: () => setIsSubmitting(false)
+                onFinish: () => setIsSubmitting(false),
             });
         }
     };
@@ -346,7 +366,7 @@ export default function AdminGallery({ galleries }: Props) {
                                 <h1 className="text-2xl font-bold text-gray-900">Kelola Galeri</h1>
                                 <p className="text-gray-600">Kelola semua galeri foto dan video Anda</p>
                             </div>
-                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:bg-blue-600 hover:cursor-pointer">
+                            <Button onClick={openCreateModal} className="bg-[#0123AA] text-white hover:cursor-pointer hover:bg-blue-600">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Tambah Galeri
                             </Button>
@@ -380,13 +400,13 @@ export default function AdminGallery({ galleries }: Props) {
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => openEditModal(gallery)}
-                                                className="bg-opacity-20 hover:cursor-pointer hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors"
+                                                className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-white transition-colors hover:cursor-pointer"
                                             >
                                                 <Edit className="h-4 w-4 text-[#0123AA]" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(gallery.id)}
-                                                className="hover:cursor-pointer bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 transition-colors"
+                                                className="bg-opacity-20 hover:bg-opacity-30 flex h-8 w-8 items-center justify-center rounded-full bg-red-600 transition-colors hover:cursor-pointer"
                                             >
                                                 <Trash2 className="h-4 w-4 text-white" />
                                             </button>
@@ -580,7 +600,7 @@ export default function AdminGallery({ galleries }: Props) {
                                         <div>
                                             <Label htmlFor="image" className="text-sm font-semibold text-gray-700">
                                                 Gambar Galeri {!editingGallery && '*'}
-                                                <span className="text-xs text-gray-500 ml-2">(Maks. 2MB)</span>
+                                                <span className="ml-2 text-xs text-gray-500">(Maks. 2MB)</span>
                                             </Label>
                                             <input
                                                 id="image"
@@ -616,7 +636,7 @@ export default function AdminGallery({ galleries }: Props) {
                                         <div>
                                             <Label htmlFor="video" className="text-sm font-semibold text-gray-700">
                                                 Video Galeri {!editingGallery && '*'}
-                                                <span className="text-xs text-gray-500 ml-2">(Maks. 10MB)</span>
+                                                <span className="ml-2 text-xs text-gray-500">(Maks. 10MB)</span>
                                             </Label>
                                             <input
                                                 id="video"
@@ -648,9 +668,37 @@ export default function AdminGallery({ galleries }: Props) {
                                             )}
                                         </div>
 
+                                        {/* Thumbnail upload shown when a video is chosen */}
+                                        {data.video && (
+                                            <div>
+                                                <Label className="text-sm font-semibold text-gray-700">Thumbnail (wajib untuk video)</Label>
+                                                <div className="mt-2">
+                                                    <div className="relative rounded-lg border-2 border-dashed border-gray-300 p-6 text-center transition-colors hover:border-blue-400">
+                                                        {previewThumb ? (
+                                                            <img
+                                                                src={previewThumb}
+                                                                alt="Thumbnail Preview"
+                                                                className="mx-auto h-32 w-auto rounded-md object-cover"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-sm text-gray-500">Unggah gambar thumbnail (JPG/PNG/WEBP, maks 2MB)</p>
+                                                        )}
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={handleThumbChange}
+                                                            className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                    </div>
+                                                    {errors.thumbnail && <p className="mt-1 text-sm text-red-600">{errors.thumbnail}</p>}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Upload Error Display */}
                                         {uploadError && (
-                                            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
                                                 <div className="flex items-center">
                                                     <div className="flex-shrink-0">
                                                         <X className="h-5 w-5 text-red-400" />
@@ -673,10 +721,10 @@ export default function AdminGallery({ galleries }: Props) {
                                         {/* Info Text */}
                                         <div className="rounded-lg bg-blue-50 p-4">
                                             <div className="flex items-start gap-2">
-                                                <div className="h-2 w-2 rounded-full bg-blue-500 mt-2"></div>
+                                                <div className="mt-2 h-2 w-2 rounded-full bg-blue-500"></div>
                                                 <div className="text-sm text-blue-700">
-                                                    <p className="font-medium mb-1">Persyaratan Upload:</p>
-                                                    <ul className="list-disc list-inside space-y-1 text-xs">
+                                                    <p className="mb-1 font-medium">Persyaratan Upload:</p>
+                                                    <ul className="list-inside list-disc space-y-1 text-xs">
                                                         <li>Pilih salah satu: gambar atau video</li>
                                                         <li>Gambar: Maksimal 2MB (JPEG, PNG, JPG, GIF, WebP)</li>
                                                         <li>Video: Maksimal 10MB (MP4, MOV, AVI, WMV)</li>
@@ -706,16 +754,18 @@ export default function AdminGallery({ galleries }: Props) {
                                     <Button
                                         type="submit"
                                         disabled={processing || isSubmitting} // Use both processing states
-                                        className="hover:cursor-pointer flex-1 bg-[#0123AA] text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 bg-[#0123AA] text-white hover:cursor-pointer hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        {(processing || isSubmitting) ? (
+                                        {processing || isSubmitting ? (
                                             <div className="flex items-center">
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                                                 {editingGallery ? 'Mengupdate...' : 'Menyimpan...'}
                                             </div>
+                                        ) : editingGallery ? (
+                                            'Update Galeri'
                                         ) : (
-                                            editingGallery ? 'Update Galeri' : 'Tambah Galeri'
+                                            'Tambah Galeri'
                                         )}
                                     </Button>
                                 </div>
