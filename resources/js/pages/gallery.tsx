@@ -14,13 +14,18 @@ interface GalleryItem {
     title: string;
     image: string | null;
     video: string | null;
+    thumbnail?: string | null;
+    image_url?: string | null;
+    video_url?: string | null;
+    thumbnail_url?: string | null;
     description: string;
     created_at: string;
     updated_at: string;
     gallery_items: GalleryItemTag[];
     // Computed properties
     type?: 'foto' | 'video';
-    mediaUrl?: string;
+    mediaUrl?: string; // used in modal: image or real video url
+    displayUrl?: string; // used in grid: image or thumbnail for video
     tags?: string[];
 }
 
@@ -47,12 +52,19 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
     const categories = ['Semua', 'Foto', 'Video'];
 
     // Transform backend data to match frontend expectations
-    const transformedGalleries = galleries.map((gallery) => ({
-        ...gallery,
-        type: gallery.image ? 'foto' : ('video' as 'foto' | 'video'),
-        mediaUrl: gallery.image ? `/storage/${gallery.image}` : gallery.video ? `/storage/${gallery.video}` : '',
-        tags: gallery.gallery_items.map((item) => item.tag),
-    }));
+    const transformedGalleries = galleries.map((gallery) => {
+        const isPhoto = !!gallery.image;
+        const imgSrc = gallery.image ? `/storage/${gallery.image}` : (gallery.image_url ?? null);
+        const vidSrc = gallery.video ? `/storage/${gallery.video}` : (gallery.video_url ?? null);
+        const thumbSrc = gallery.thumbnail ? `/storage/${gallery.thumbnail}` : (gallery.thumbnail_url ?? null);
+        return {
+            ...gallery,
+            type: isPhoto ? 'foto' : ('video' as 'foto' | 'video'),
+            mediaUrl: isPhoto ? (imgSrc ?? '') : (vidSrc ?? ''),
+            displayUrl: isPhoto ? (imgSrc ?? '') : (thumbSrc ?? ''),
+            tags: gallery.gallery_items.map((item) => item.tag),
+        };
+    });
 
     const filteredItems = transformedGalleries.filter((item) => {
         const categoryMatch =
@@ -191,9 +203,9 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                 </div>
 
                                 {/* Gallery Stats */}
-                                <div className="mt-6 pt-6 border-t border-gray-200">
+                                <div className="mt-6 border-t border-gray-200 pt-6">
                                     <div className="text-sm text-gray-600">
-                                        <div className="flex justify-between mb-2">
+                                        <div className="mb-2 flex justify-between">
                                             <span>Total Items:</span>
                                             <span className="font-semibold">{filteredItems.length}</span>
                                         </div>
@@ -226,7 +238,7 @@ export default function GalleryPage({ galleries, aboutImage }: Props) {
                                             <div className="relative h-80 overflow-hidden bg-gray-100">
                                                 <img
                                                     src={
-                                                        item.mediaUrl ||
+                                                        item.displayUrl ||
                                                         'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1zbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZTwvdGV4dD48L3N2Zz4='
                                                     }
                                                     alt={item.title}
