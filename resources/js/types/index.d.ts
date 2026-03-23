@@ -40,3 +40,22 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface OnlineShop {
+    id: string;
+    name: string;
+    image: string;
+    description: string;
+    url: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Information {
+    id: string;
+    title: string;
+    header: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+}

@@ -6,7 +6,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
@@ -17,11 +16,34 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
+    // success handler: keep minimal behavior (log) and allow further extension
+    const handleSuccess = (payload: any) => {
+        console.log('Login success:', payload);
+    };
+
+    // error handler: log and focus the first field with an error
+    const handleError = (errorsObj: Record<string, any>) => {
+        console.error('Login errors:', errorsObj);
+        const firstKey = Object.keys(errorsObj)[0];
+        if (!firstKey) return;
+
+        const el = document.getElementById(firstKey);
+        if (el && typeof (el as HTMLElement).focus === 'function') {
+            (el as HTMLElement).focus();
+        }
+    };
+
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
+        <AuthLayout title="Log in to your account" description="Enter your email and password below t                                   o log in">
             <Head title="Log in" />
 
-            <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
+            <Form
+                {...AuthenticatedSessionController.store.form()}
+                resetOnSuccess={['password']}
+                onSuccess={handleSuccess}
+                onError={handleError}
+                className="flex flex-col gap-6"
+            >
                 {({ processing, errors }) => (
                     <>
                         <div className="grid gap-6">
@@ -70,13 +92,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                 Log in
                             </Button>
-                        </div>
-
-                        <div className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{' '}
-                            <TextLink href={register()} tabIndex={5}>
-                                Sign up
-                            </TextLink>
                         </div>
                     </>
                 )}

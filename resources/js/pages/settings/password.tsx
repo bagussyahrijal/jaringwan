@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/password';
+import AdminLayout from '@/layouts/admin-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -25,7 +26,7 @@ export default function Password() {
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Password settings" />
 
             <SettingsLayout>
@@ -117,6 +118,6 @@ export default function Password() {
                     </Form>
                 </div>
             </SettingsLayout>
-        </AppLayout>
+        </AdminLayout>
     );
 }
